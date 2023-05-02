@@ -1,0 +1,13 @@
+{
+  "name": "stickynotes-to-shapes",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "@mirohq/websdk-types": "latest",
+    "vite": "2.9.13"
+  }
+}
