@@ -4,15 +4,14 @@ from io import BytesIO
 import numpy as np
 from PIL import Image
 
-
-# utility - upload umage to S3
+##########################################
+# utility functions - upload umage to S3 #
+##########################################
 class S3ImagesInvalidExtension(Exception):
     pass
 
-
 class S3ImagesUploadFailed(Exception):
     pass
-
 
 def to_s3(s3_client, img, bucket, key):
     buffer = BytesIO()
@@ -27,7 +26,6 @@ def to_s3(s3_client, img, bucket, key):
     else:
         print("Upload sucessfully")
 
-
 def get_safe_ext(key):
     ext = os.path.splitext(key)[-1].strip('.').upper()
     if ext in ['JPG', 'JPEG']:
@@ -36,7 +34,6 @@ def get_safe_ext(key):
         return 'PNG'
     else:
         raise S3ImagesInvalidExtension('Extension is invalid')
-
 
 def upload_image_to_s3(image, bucket):
     key = hashlib.sha1(bytes(str(time.time()), 'utf')).hexdigest()
@@ -49,14 +46,18 @@ def upload_image_to_s3(image, bucket):
 
 
 # import requests
+##############################################
+# ML endpoints invocation                    #
+# Endpoint names are stored in env variables #
+# ENDPOINT_NAME_CREATE - create image        #
+# ENDPOINT_NAME_MODIFY - modify image        #
+# CLOUDFRONT_URL - URL for cloudfront        #
+##############################################
 
 # Create image based on text
 def create_image_from_text(parameters):
     # '''
     ENDPOINT_NAME_CREATE = os.environ['ENDPOINT_NAME_CREATE']
-    #ENDPOINT_NAME_MODIFY = os.environ['ENDPOINT_NAME_MODIFY']
-
-    # ENDPOINT_NAME = "jumpstart-example-infer-model-txt2img-s-2023-02-10-19-44-33-357"
     runtime = boto3.client('runtime.sagemaker')
     #
     print("Call endpoint: ", ENDPOINT_NAME_CREATE)
@@ -68,17 +69,15 @@ def create_image_from_text(parameters):
     response_image = response["Body"]
     stream = response_image.read()
     data = json.loads(stream)
-    #image, prompt = data['generated_images'][0], data['prompt']
-    #img_to_save = Image.fromarray(np.uint8(np.array(image)), "RGB")
-    #
     new_byte_io = BytesIO(base64.decodebytes(data.encode("utf-8")))
 
     new_image = Image.open(new_byte_io)
-    bucket = "miro-app-image-style-transfer"
+    bucket = os.environ['S3_BUCKET']
+
     response_file_name = upload_image_to_s3(new_image, bucket)
-    # response_file_name = "ffc41f731cb3aa342aa2c14bcdf6edd5e54a4309.jpg"
     #
-    cloudfront_url = "https://di06o62ghj1zv.cloudfront.net"
+    #cloudfront_url = "https://di06o62ghj1zv.cloudfront.net"
+    cloudfront_url = os.environ['CLOUDFRONT_URL']
     full_response_url = os.path.join(cloudfront_url, response_file_name)
     return full_response_url
 
@@ -103,11 +102,11 @@ def modify_image(parameters):
 
     new_image = Image.open(new_byte_io)
     #
-    bucket = "miro-app-image-style-transfer"
+    #bucket = "miro-app-image-style-transfer"
+    bucket = os.environ['S3_BUCKET']
     response_file_name = upload_image_to_s3(new_image, bucket)
-    # response_file_name = "ffc41f731cb3aa342aa2c14bcdf6edd5e54a4309.jpg"
     #
-    cloudfront_url = "https://di06o62ghj1zv.cloudfront.net"
+    cloudfront_url = os.environ['CLOUDFRONT_URL']
     full_response_url = os.path.join(cloudfront_url, response_file_name)
     return full_response_url
 
