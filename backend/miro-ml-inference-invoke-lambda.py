@@ -174,7 +174,7 @@ def lambda_handler(event, context):
 
     except Exception as e:
         print ("-------- Exception: ", str(e))
-        return getResponceStruct({"reply": "Error: " + str(a) }, statusCode=404, isBase64Encoded=False)
+        return getResponceStruct({"reply": "Error: " + str(e) }, statusCode=404, isBase64Encoded=False)
 
     # If HTTP Method is not POST -> return standard error
     print ("-------- Return default reply")
