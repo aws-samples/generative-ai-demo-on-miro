@@ -1,5 +1,6 @@
 #FROM public.ecr.aws/lambda/python:3.8
-FROM ubuntu:20.04
+#FROM ubuntu:20.04
+FROM public.ecr.aws/ubuntu/ubuntu:20.04_stable
 
 RUN apt-get update && apt-get install -y --no-install-recommends git wget python3 python3-pip && pip install awslambdaric
 
