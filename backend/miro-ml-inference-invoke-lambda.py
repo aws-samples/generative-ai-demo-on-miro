@@ -168,7 +168,7 @@ def lambda_handler(event, context):
                 print ("----- Action: modify")
                 full_response_url = modify_image(parameters)
             else:
-                raise ("Error: invalid command action '%s'" % command['action'])
+                raise Exception("invalid command action '%s'" % command['action'])
             #
             return getResponceStruct({"responseURL": full_response_url})              # return structured answer
 
