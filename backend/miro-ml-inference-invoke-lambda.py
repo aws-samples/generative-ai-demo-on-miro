@@ -168,13 +168,13 @@ def lambda_handler(event, context):
                 print ("----- Action: modify")
                 full_response_url = modify_image(parameters)
             else:
-                raise ("Error: invalid command action")
+                raise ("Error: invalid command action '%s'" % command['action'])
             #
             return getResponceStruct({"responseURL": full_response_url})              # return structured answer
 
     except Exception as e:
-        print ("-------- Exception: ", e.with_traceback())
-        return getResponceStruct({"reply": "Error: ", "Error_details": e }, statusCode=404, isBase64Encoded=False)
+        print ("-------- Exception: ", str(e))
+        return getResponceStruct({"reply": "Error: " + str(a) }, statusCode=404, isBase64Encoded=False)
 
     # If HTTP Method is not POST -> return standard error
     print ("-------- Return default reply")
