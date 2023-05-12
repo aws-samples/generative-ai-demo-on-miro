@@ -178,4 +178,4 @@ def lambda_handler(event, context):
 
     # If HTTP Method is not POST -> return standard error
     print ("-------- Return default reply")
-    return getResponceStruct({"reply": "Only POST requests accepted"}, statusCode=404, isBase64Encoded=False)
+    return getResponceStruct({"reply": "Only POST requests accepted"}, statusCode=200, isBase64Encoded=False)
