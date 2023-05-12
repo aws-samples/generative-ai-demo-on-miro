@@ -170,11 +170,11 @@ def lambda_handler(event, context):
             else:
                 raise Exception("invalid command action '%s'" % command['action'])
             #
-            return getResponceStruct({"responseURL": full_response_url})              # return structured answer
+            return getResponceStruct({"status": "ok", "responseURL": full_response_url})              # return structured answer
 
     except Exception as e:
         print ("-------- Exception: ", str(e))
-        return getResponceStruct({"reply": "Error: " + str(e) }, statusCode=404, isBase64Encoded=False)
+        return getResponceStruct({"status": "error", "reply": "Error: " + str(e) }, statusCode=200, isBase64Encoded=False)
 
     # If HTTP Method is not POST -> return standard error
     print ("-------- Return default reply")
