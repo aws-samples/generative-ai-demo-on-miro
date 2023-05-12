@@ -59,7 +59,7 @@ def getResponceStruct (data, statusCode=200, isBase64Encoded = True ):
     return {
         'headers': {"Content-Type": "text/json", "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Headers": "Content-Type, Access-Control-Allow-Origin",
-                    "Access-Control-Allow-Methods": "OPTIONS,POST,GET"},
+                    "Access-Control-Allow-Methods": "OPTIONS,POST,GET", "Cache-Control" : "no-cache"},
         'statusCode': statusCode,
         'isBase64Encoded': isBase64Encoded,
         'body': bodyDump
