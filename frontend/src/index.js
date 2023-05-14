@@ -33,7 +33,7 @@ async function init() {
 
     // Get selected items and filter images
     let selectedItems = await board.getSelection();
-    console.log(selectedItems);
+    console.log("Selected items: ", selectedItems);
 
     //-----------------------------------------//
     // look for case 1 - image style transfer  ||
@@ -257,7 +257,7 @@ async function init() {
             // error handling
             if (data["status"] != "ok") {
               // if error happened - put error sticker to the board
-              createError(new_x, new_y, data.toString())
+              createError(new_x, new_y, data['reply'].toString())
               return 0;
             }
             // if status OK -> create image on the board
@@ -290,6 +290,87 @@ async function init() {
         return 0;
 
       }
+    }
+
+    //------------------------------------------------------------------//
+    // look for case 4 - image inpainting from image & shape & sticker  //
+    //------------------------------------------------------------------//
+
+    let connectors = selectedItems.filter((item) => item.type === 'connector');
+    let shapes = selectedItems.filter((item) => item.type === 'shape');
+    if (images.length === 1 && stickers.length === 1 && connectors.length === 1 && shapes.length === 1) {
+      console.log (" running use-case 4: image inpainting")
+      console.log ("Shape: ", shapes[0])
+      const new_x = stickers[0].x + (stickers[0].x - images[0].x)
+      const new_y = stickers[0].y + (stickers[0].y - images[0].y)
+      if (shapes[0].shape != 'circle') {
+        createError(new_x, new_y, "Error: invalid selection. Please select 1 image, 1 circle shape, 1 sticker and an arrow from image to sticker")
+        return 0;
+      }
+      const prompt = stickers[0].content.replaceAll(/<\/?[^>]+(>|$)/gi, "")
+      const shape_position = {
+        x : shapes[0].x - (images[0].x - images[0].width/2 ),
+        y : shapes[0].y - (images[0].y - images[0].height/2 ),
+        width : shapes[0].width,
+        height : shapes[0].height,
+        type : shapes[0].type
+      }
+      console.log("New shape: ", shape_position)
+      // Create new request
+      const parametersPOST = {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json;charset=UTF-8',
+        },
+        // put images URL to body request
+        body: btoa(JSON.stringify({
+          action: "inpaint",
+          prompt: prompt,
+          image_url: images[0].url,
+          shape_position: shape_position,
+          width : images[0].width,
+          height : images[0].height,
+          guidance_scale : 7
+        }))
+      }
+
+      // Call server to make inpainting
+      const response = await fetch(apiUrl, parametersPOST)
+      if (response.ok) {
+        console.log("Server data received: ", response)
+        const data = await response.json()
+        console.log("Response data:", data)
+        // error handling
+        if (data["status"] != "ok") {
+          // if error happened - put error sticker to the board
+          createError(new_x, new_y, data['reply'].toString())
+          return 0;
+        }
+        // if status OK -> create image on the board
+        const image = await board.createImage({
+          title: "Modified image",
+          url: data['responseURL'],
+          x: new_x, // Default value: horizontal center of the board
+          y: new_y, // Default value: vertical center of the board
+          width: 512, // Set either 'width', or 'height'
+          //height: content_item.height,
+          rotation: 0.0,
+        });
+
+
+      } else {
+        // error happened
+        console.log("Server data received: ", response)
+        const data = await response.json()
+        console.log("Response data:", data)
+        // create error sticker on the board
+        createError(new_x, new_y, data['reply'].toString())
+        return 0;
+
+      }
+
+
+
     }
 
 
