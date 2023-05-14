@@ -1,8 +1,8 @@
 import boto3
-import base64, json, os, hashlib, time
+import base64, json, os, hashlib, time, io, requests
 from io import BytesIO
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ##########################################
 # Parameters                             #
@@ -115,13 +115,13 @@ def create_image_from_text(parameters):
     print("Call endpoint: ", ENDPOINT_NAME)
     print("With parameters: ", parameters)
 
-    request_parametes = {}
+    request_parameters = {}
     # transfer to request_parameters only valid fields
     for i in ['prompt', 'negative_prompt', 'seed']:
         if i in parameters:
-            request_parametes[i] = parameters[i]
+            request_parameters[i] = parameters[i]
 
-    encoded_text = json.dumps(request_parametes).encode("utf-8")
+    encoded_text = json.dumps(request_parameters).encode("utf-8")
     response = runtime.invoke_endpoint(EndpointName=ENDPOINT_NAME,
                                        ContentType='application/json',
                                        Body=encoded_text)
@@ -131,6 +131,7 @@ def create_image_from_text(parameters):
     return upload_return_cf_url(new_image)
 
 # Modify image based on text suggestion
+# TODO - refactor this function
 def modify_image(parameters):
     ENDPOINT_NAME = os.environ['ENDPOINT_NAME_MODIFY']
 
@@ -142,6 +143,53 @@ def modify_image(parameters):
                                        ContentType='application/json',
                                        Body=parameters)
     print ("Received reply from endpoint, len: ", len(response))
+
+    new_image = convert_to_image(response)
+    return upload_return_cf_url(new_image)
+
+def inpaint_image(parameters):
+    ENDPOINT_NAME = os.environ['ENDPOINT_NAME_INPAINT']
+    runtime = boto3.client('runtime.sagemaker')
+    parameters = json.loads(parameters)
+    print("Call endpoint: ", ENDPOINT_NAME)
+    print("With parameters: ", parameters)
+    image_url = parameters['image_url']
+    prompt = parameters['prompt']
+    shape_position = parameters['shape_position']
+    sh_x1 = shape_position['x'] - shape_position['width'] / 2
+    sh_x2 = shape_position['x'] + shape_position['width'] / 2
+    sh_y1 = shape_position['y'] - shape_position['height'] / 2
+    sh_y2 = shape_position['y'] + shape_position['height'] / 2
+
+    # load image and prepare
+    image = Image.open(requests.get(image_url, stream=True).raw)
+    b = io.BytesIO()
+    image.save(b, 'jpeg')
+    encoded_input_image = base64.b64encode(bytearray(b.getvalue())).decode()
+
+    # create mask
+    mask_image = Image.new(mode="L", size=image.size)
+    # draw mask
+
+    draw = ImageDraw.Draw(mask_image)
+    draw.ellipse((sh_x1, sh_y1, sh_x2, sh_y2), fill=(255), outline=(0))
+
+    b_m = io.BytesIO()
+    mask_image.save(b_m, 'jpeg')
+    encoded_mask_image = base64.b64encode(bytearray(b_m.getvalue())).decode()
+    parameters = {
+        "prompt": parameters['prompt'],
+        "image": encoded_input_image,
+        "mask_image": encoded_mask_image,
+        "num_inference_steps": 50,
+        "guidance_scale": 7.5,
+        "seed": 0,
+    }
+    encoded_text = json.dumps(parameters).encode("utf-8")
+    response = runtime.invoke_endpoint(EndpointName=ENDPOINT_NAME,
+                                       ContentType='application/json;jpeg',
+                                       Body=encoded_text)
+    print("Received reply from endpoint, len: ", len(response))
 
     new_image = convert_to_image(response)
     return upload_return_cf_url(new_image)
@@ -184,6 +232,9 @@ def lambda_handler(event, context):
             elif (command['action'] == 'modify'):
                 print ("----- Action: modify")
                 full_response_url = modify_image(parameters)
+            elif (command['action'] == 'inpaint'):
+                print("----- Action: inpaint")
+                full_response_url = inpaint_image(parameters)
             else:
                 raise Exception("invalid command action '%s'" % command['action'])
             #
