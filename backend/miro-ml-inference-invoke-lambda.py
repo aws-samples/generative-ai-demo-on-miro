@@ -111,8 +111,10 @@ def create_image_from_text(parameters):
     ENDPOINT_NAME = os.environ['ENDPOINT_NAME_CREATE']
     runtime = boto3.client('runtime.sagemaker')
     #
+    parameters = json.loads(parameters)
     print("Call endpoint: ", ENDPOINT_NAME)
     print("With parameters: ", parameters)
+
     request_parametes = {}
     # transfer to request_parameters only valid fields
     for i in ['prompt', 'negative_prompt', 'seed']:
