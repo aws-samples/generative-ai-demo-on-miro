@@ -78,11 +78,19 @@ def getResponceStruct (data, statusCode=200, isBase64Encoded = True ):
 #################################################
 
 # convert Sagemaker response to image
-def convert_to_image (response_image):
+def convert_to_image (response_sagemaker):
+    response_image = response["Body"]
     stream = response_image.read()
     data = json.loads(stream)
-    new_byte_io = BytesIO(base64.decodebytes(data.encode("utf-8")))
-    return Image.open(new_byte_io)
+
+    responce_array = data['generated_images'][0]
+    # create Image from stream
+    new_image = Image.fromarray(np.array(responce_array).astype('uint8'), 'RGB')
+    return new_image
+
+def load_image_from_array(responce_array):
+    # create image from array
+    return Image.fromarray(np.array(responce_array).astype('uint8'), 'RGB')
 
 # upload file to S3 and return url to CloudFront
 # Environment variables
@@ -105,12 +113,19 @@ def create_image_from_text(parameters):
     #
     print("Call endpoint: ", ENDPOINT_NAME)
     print("With parameters: ", parameters)
+    request_parametes = {}
+    # transfer to request_parameters only valid fields
+    for i in ['prompt', 'negative_prompt', 'seed']:
+        if i in parameters:
+            request_parametes[i] = parameters[i]
+
+    encoded_text = json.dumps(request_parametes).encode("utf-8")
     response = runtime.invoke_endpoint(EndpointName=ENDPOINT_NAME,
                                        ContentType='application/json',
-                                       Body=parameters)
+                                       Body=encoded_text)
     print("Received reply from endpoint, len: ", len(response))
 
-    new_image = convert_to_image(response["Body"])
+    new_image = convert_to_image(response)
     return upload_return_cf_url(new_image)
 
 # Modify image based on text suggestion
