@@ -79,7 +79,7 @@ def getResponceStruct (data, statusCode=200, isBase64Encoded = True ):
 
 # convert Sagemaker response to image
 def convert_to_image (response_sagemaker):
-    response_image = response["Body"]
+    response_image = response_sagemaker["Body"]
     stream = response_image.read()
     data = json.loads(stream)
 
@@ -143,7 +143,7 @@ def modify_image(parameters):
                                        Body=parameters)
     print ("Received reply from endpoint, len: ", len(response))
 
-    new_image = convert_to_image(response["Body"])
+    new_image = convert_to_image(response)
     return upload_return_cf_url(new_image)
 
 # Main handler
