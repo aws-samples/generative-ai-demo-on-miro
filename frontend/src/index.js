@@ -313,7 +313,7 @@ async function init() {
         y : shapes[0].y - (images[0].y - images[0].height/2 ),
         width : shapes[0].width,
         height : shapes[0].height,
-        type : shapes[0].type
+        type : shapes[0].shape
       }
       console.log("New shape: ", shape_position)
       // Create new request
