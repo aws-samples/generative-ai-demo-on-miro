@@ -182,8 +182,7 @@ def inpaint_image(parameters):
         "image": encoded_input_image,
         "mask_image": encoded_mask_image,
         "num_inference_steps": 50,
-        "guidance_scale": 7.5,
-        "seed": 0,
+        "guidance_scale": 7.5
     }
     encoded_text = json.dumps(parameters).encode("utf-8")
     response = runtime.invoke_endpoint(EndpointName=ENDPOINT_NAME,
