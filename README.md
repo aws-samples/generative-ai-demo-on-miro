@@ -1,6 +1,35 @@
 ![Build Status](https://gitlab.com/pages/plain-html/badges/master/build.svg)
 
 ---
+## Generative AI demo on Miro board
+
+# Installation
+1. Create IAM role “generative-ai-demo-function”
+2. Create IAM role “generative-ai-demo-demo-operator”
+3. Create CodeCommit repository
+4. Push this GitLab Repository to CodeCommit
+5. (Automate next steps)
+6. Create S3 bucket
+7. Create subfolder ‘out_images’ 
+8. Create CloudFront distribution 
+9. Create ECR repository 
+10. Create CloudBuild pipeline 
+11. Run CloudBuild to build container/push to ECR
+12. Create Lambda from ECR container (Parameters: Extend running time to 20 sec, Create environment variables. Role: “demo_function”)
+13. Create API Gateway / point to Lambda
+14. Setup npm for Cloud9 
+15. Edit “index.js” / add API Gateway URL 
+16. Enter to frontend/ and build frontend 
+17. Deploy frontend to S3 bucket 
+18. Start Sagemaker notebook 
+19. Open “ml_example-1” notebook 
+20. Setup environment variable for Lambda
+
+") Note: don't forget shutdown all Sagemaker endpoints to avoid receiving unnecessary charges.
+
+
+
+---
 
 Example plain HTML site using GitLab Pages.
 
