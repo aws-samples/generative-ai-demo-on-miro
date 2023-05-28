@@ -6,28 +6,57 @@
 # Installation
 1. Create IAM role “generative-ai-demo-function”
 2. Create IAM role “generative-ai-demo-demo-operator”
-3. Create CodeCommit repository
-4. Push this GitLab Repository to CodeCommit
-5. (Automate next steps)
-6. Create S3 bucket
-7. Create subfolder ‘out_images’ 
-8. Create CloudFront distribution 
-9. Create ECR repository 
-10. Create CloudBuild pipeline 
-11. Run CloudBuild to build container/push to ECR
-12. Create Lambda from ECR container (Parameters: Extend running time to 20 sec, Create environment variables. Role: “demo_function”)
-13. Create API Gateway / point to Lambda
-14. Setup npm for Cloud9 
-15. Edit “index.js” / add API Gateway URL 
-16. Enter to frontend/ and build frontend 
-17. Deploy frontend to S3 bucket 
-18. Start Sagemaker notebook 
-19. Open “ml_example-1” notebook 
-20. Setup environment variable for Lambda
+3. Create CodeCommit and push this GitLab Repository to CodeCommit
+4. (Automate next steps: 6, 7, 8, 9, 10, 11, 12, 13)
+5. Create S3 bucket
+6. Create subfolder ‘out_images’ 
+7. Create CloudFront distribution 
+8. Create ECR repository 
+9. Create CloudBuild pipeline 
+10. Run CloudBuild to build container/push to ECR
+11. Create Lambda from ECR container (Parameters: Extend running time to 20 sec, Create environment variables. Role: “demo_function”)
+12. Create API Gateway / point to Lambda
+13. Edit “index.js” / add API Gateway URL 
+14. [Build frontend and deploy to S3 bucket](#frontend-setup) 
+15. Start Sagemaker notebook 
+16. Open “ml_example-1” notebook 
+17. Setup environment variable for Lambda
 
 ") Note: don't forget shutdown all Sagemaker endpoints to avoid receiving unnecessary charges.
 
+## Create CloudFront and setup policy to S3
+When you created S3 and CloudFront distrubution you need to setup correct access list ot S3. Here is the example:
+```
+{
+    "Version": "2008-10-17",
+    "Id": "PolicyForCloudFrontPrivateContent",
+    "Statement": [
+        {
+            "Sid": "AllowCloudFrontServicePrincipal",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudfront.amazonaws.com"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::miro-app-image-style-transfer/*",
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": "arn:aws:cloudfront::616815736523:distribution/E21OMBYGU2GUQC"
+                }
+            }
+        }
+    ]
+}
 
+```
+
+## Frontend setup
+````
+# cd frontend
+# npm install
+# npm run build
+# aws s3 cp dist/ s3://<bucket_for_app_distribution> --recursive
+````
 
 ---
 

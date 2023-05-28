@@ -25,6 +25,10 @@ async function init() {
   // 3 - selection: a picture, a sticky note and arrow -> image change based on prompt
   //
   //
+  // debug: print application log message and site origin
+  let app_origin = location.origin;
+  console.log("Generative AI demo for Miro loading...")
+  console.log("Server origin: ", app_origin)
 
   board.ui.on("icon:click", async () => {
     // procedure parameters
