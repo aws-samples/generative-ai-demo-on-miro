@@ -26,14 +26,16 @@ async function init() {
   //
   //
   // debug: print application log message and site origin
-
+  let app_origin = location.origin;
+  console.log("Generative AI demo for Miro loading...")
+  console.log("Server origin: ", app_origin)
 
   board.ui.on("icon:click", async () => {
-    let app_origin = location.origin;
-    console.log("Generative AI demo for Miro running...")
-    console.log("Server origin: ", app_origin)
+
     // procedure parameters
-    const apiUrl = "https://4ay7wa1sij.execute-api.us-east-1.amazonaws.com/default/lambda-generative-ai-demo-on-miro"
+    //const apiUrl = "https://4ay7wa1sij.execute-api.us-east-1.amazonaws.com/default/lambda-generative-ai-demo-on-miro"
+    //redirect to CloudFront
+    const apiUrl = app_origin + "/api/lambda-generative-ai-demo-on-miro"
 
 
     // Get selected items and filter images
