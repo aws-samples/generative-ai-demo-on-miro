@@ -10,21 +10,24 @@
 4. (Automate next steps: 6, 7, 8, 9, 10, 11, 12, 13)
 5. Create S3 bucket
 6. Create subfolder ‘out_images’ 
-7. Create CloudFront distribution 
+7. [Create CloudFront distribution and setup policy for S3](#7-create-cloudfront-and-setup-policy-to-s3)
 8. Create ECR repository 
 9. Create CloudBuild pipeline 
 10. Run CloudBuild to build container/push to ECR
 11. Create Lambda from ECR container (Parameters: Extend running time to 20 sec, Create environment variables. Role: “demo_function”)
 12. Create API Gateway / point to Lambda
 13. Edit “index.js” / add API Gateway URL 
-14. [Build frontend and deploy to S3 bucket](#frontend-setup) 
+14. [Build frontend and deploy to S3 bucket](#14-frontend-setup) 
 15. Start Sagemaker notebook 
 16. Open “ml_example-1” notebook 
 17. Setup environment variable for Lambda
 
 ") Note: don't forget shutdown all Sagemaker endpoints to avoid receiving unnecessary charges.
 
-## Create CloudFront and setup policy to S3
+## 7. Create CloudFront and setup policy to S3
+- Create second origin for API Gateway.
+- Create behaviour for CloudFront to redirect `/api/*` calls
+
 When you created S3 and CloudFront distrubution you need to setup correct access list ot S3. Here is the example:
 ```
 {
@@ -49,12 +52,16 @@ When you created S3 and CloudFront distrubution you need to setup correct access
 }
 
 ```
+## 12. Create APIGateway
+- create `api` staging
+- enable staging URL to have it like `/api/<lambda-name` .
 
-## Frontend setup
+## 14. Frontend setup
 ````
 # cd frontend
 # npm install
 # npm run build
+# aws s3 rm s3://miro-app-image-style-transfer/assets --recursive
 # aws s3 cp dist/ s3://<bucket_for_app_distribution> --recursive
 ````
 
