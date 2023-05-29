@@ -1,34 +1,85 @@
 ![Build Status](https://gitlab.com/pages/plain-html/badges/master/build.svg)
 
 ---
-## Generative AI demo on Miro board
+## Installation steps
+1. [Create IAM role “generative-ai-demo-function”](#1-create-iam-role-generative-ai-demo-function)
+2. [Create IAM role “generative-ai-demo-demo-operator”](#2-create-iam-role-generative-ai-demo-demo-operator)
+3. [Create CodeCommit and push this GitLab Repository to CodeCommit](#3-create-codecommit-repository-and-push-this-repository-to-it)
+4. [Create ECR repository](#4-create-ecr-repository) 
+5. [Create CloudBuild pipeline & run build](#5-create-cloudbuild-configuration--run-build)
+6. [Create Lambda from ECR container](#6-create-lambda-from-ecr-repository)
+7. [Create APIGateway](#7-create-apigateway)
+8. [Create S3 bucket](#8-create-s3-bucket)
+9. [Create CloudFront distribution & update lambda variable](#9-create-cloudfront-distribution--lambda-variable)
+10. [Update S3 bucket access policy](#10-update-s3-bucket-access-policy)
+11. [Build frontend app & deploy to bucket](#11-build-frontend-app--deploy-to-bucket)
+12. [Run Sagemaker endpoint-1](#12-13-14-run-sagemaker-endpoint)
+13. Run Sagemaker endpoint-2
+14. Run Sagemaker endpoint-3
+15. [Open Miro and integrate application](#15-open-miro-and-integrate-application)
 
-# Installation
-1. Create IAM role “generative-ai-demo-function”
-2. Create IAM role “generative-ai-demo-demo-operator”
-3. Create CodeCommit and push this GitLab Repository to CodeCommit
-4. (Automate next steps: 6, 7, 8, 9, 10, 11, 12, 13)
-5. Create S3 bucket
-6. Create subfolder ‘out_images’ 
-7. [Create CloudFront distribution and setup policy for S3](#7-create-cloudfront-and-setup-policy-to-s3)
-8. Create ECR repository 
-9. Create CloudBuild pipeline 
-10. Run CloudBuild to build container/push to ECR
-11. Create Lambda from ECR container (Parameters: Extend running time to 20 sec, Create environment variables. Role: “demo_function”)
-12. Create API Gateway / point to Lambda
-13. Edit “index.js” / add API Gateway URL 
-14. [Build frontend and deploy to S3 bucket](#14-frontend-setup) 
-15. Start Sagemaker notebook 
-16. Open “ml_example-1” notebook 
-17. Setup environment variable for Lambda
+### 1. Create IAM role “generative-ai-demo-function”
 
-") Note: don't forget shutdown all Sagemaker endpoints to avoid receiving unnecessary charges.
 
-## 7. Create CloudFront and setup policy to S3
-- Create second origin for API Gateway.
-- Create behaviour for CloudFront to redirect `/api/*` calls
+### 2. Create IAM role “generative-ai-demo-demo-operator”
 
-When you created S3 and CloudFront distrubution you need to setup correct access list ot S3. Here is the example:
+
+### 3. Create CodeCommit repository and push this repository to it
+
+Repository name: 'generative-ai-demo-on-miro'
+
+### 4. Create ECR repository
+Repository name = `generative-ai-demo-on-miro`
+
+### 5. Create CloudBuild configuration & run build
+- Compute: 3 GB memory, 2 vCPUs
+- Image: `aws/codebuild/standard:5.0`
+- Role: `generative-ai-demo-demo-operator`
+- Buildspec: `backend/buildspec.yml`
+- Environment variables:
+  - `AWS_DEFAULT_REGION` = `us-east-1`
+  - `AWS_ACCOUNT_ID` = `<AWS ID>`
+  - `IMAGE_TAG` = `latest`
+  - `IMAGE_REPO_NAME` = `generative-ai-demo-on-miro`
+
+### 6. Create Lambda from ECR repository
+
+- Create Lambda from ECR. Name = `lambda-generative-ai-demo-on-miro`
+- Extend running time to 20s
+- Setup environment variables:
+  - `CLOUDFRONT_URL` = `<update after step 9>`
+  - `S3_BUCKET` = `generative-ai-demo-on-miro-bucket`
+  - `ENDPOINT_NAME_CREATE` = `jumpstart-example-infer-model-txt2img-demo-on-miro-1`
+  - `ENDPOINT_NAME_INPAINT` = `jumpstart-example-model-inpainting-demo-on-miro-1`
+  - `ENDPOINT_NAME_MODIFY` = `TBD`
+  - `ENDPOINT_NAME_STYLE_TRANSFER` = `TBD`
+
+**Note:** *Names of Sagemaker endpoints are hardcoded to notebooks to simplify demo start*
+
+### 7. Create APIGateway
+
+- Default endpoint: `Enabled`
+- Stage name: `api`
+- Invoke URL: `https://<ENDPOINT>/api`
+- API endpoint: `https://<ENDPOINT>/api/lambda-generative-ai-demo-on-miro`
+
+### 8. Create S3 bucket
+
+Bucket name = 'generative-ai-demo-on-miro-bucket'
+
+### 9. Create CloudFront distribution & lambda variable
+
+- General settings: default root object: `index.html`
+- Two origins:
+  - Origin type: S3, Point to S3 bucket, Origin access control settings -> Update S3 bucket policy
+  - Origin type: Custom origin, Point to APIGateway, protocol: match viewer
+- Behavior: Default(*), plus `/api/*` -> redirect to APIGateway origin, HTTP methods: `POST`
+
+**Don't forget to update Lambda environment variable with CloudFront URL !**
+
+### 10. Update S3 bucket access policy
+
+Setup following access policy to S3 to allow CloudFront access (example):
 ```
 {
     "Version": "2008-10-17",
@@ -41,10 +92,10 @@ When you created S3 and CloudFront distrubution you need to setup correct access
                 "Service": "cloudfront.amazonaws.com"
             },
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::miro-app-image-style-transfer/*",
+            "Resource": "arn:aws:s3:::generative-ai-demo-on-miro-bucket/*",
             "Condition": {
                 "StringEquals": {
-                    "AWS:SourceArn": "arn:aws:cloudfront::616815736523:distribution/E21OMBYGU2GUQC"
+                    "AWS:SourceArn": <<__ "arn:aws:cloudfront::616815736523:distribution/E21OMBYGU2GUQC" __>>
                 }
             }
         }
@@ -52,81 +103,28 @@ When you created S3 and CloudFront distrubution you need to setup correct access
 }
 
 ```
-## 12. Create APIGateway
-- create `api` staging
-- enable staging URL to have it like `/api/<lambda-name` .
 
-## 14. Frontend setup
+### 11. Build frontend app & deploy to bucket
+
+Open Cloud9, enter to main catalog of git repository.
 ````
-# cd frontend
-# npm install
-# npm run build
-# aws s3 rm s3://miro-app-image-style-transfer/assets --recursive
-# aws s3 cp dist/ s3://<bucket_for_app_distribution> --recursive
+$ cd frontend
+$ npm install
+$ npm run build
+$ aws s3 rm s3://generative-ai-demo-on-miro-bucket/assets --recursive
+$ aws s3 cp dist/ s3://generative-ai-demo-on-miro-bucket --recursive
 ````
+Step 4 needs to clean previous installations.
 
----
+### 12, 13, 14 Run Sagemaker endpoint
 
-Example plain HTML site using GitLab Pages.
+- open Sagemaker notebook
+- run all steps
+- check if endpoint works
 
-Learn more about GitLab Pages at https://pages.gitlab.io and the official
-documentation https://docs.gitlab.com/ce/user/project/pages/.
+**Don't forget delete endpoint after demo session to avoid high $$$ spend in your account !!!**
 
----
+### 15. Open Miro and integrate application
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+**TBD**
 
-- [GitLab CI](#gitlab-ci)
-- [GitLab User or Group Pages](#gitlab-user-or-group-pages)
-- [Did you fork this project?](#did-you-fork-this-project)
-- [Troubleshooting](#troubleshooting)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-## GitLab CI
-
-This project's static Pages are built by [GitLab CI][ci], following the steps
-defined in [`.gitlab-ci.yml`](.gitlab-ci.yml):
-
-```
-image: alpine:latest
-
-pages:
-  stage: deploy
-  script:
-  - echo 'Nothing to do...'
-  artifacts:
-    paths:
-    - public
-  only:
-  - master
-```
-
-The above example expects to put all your HTML files in the `public/` directory.
-
-## GitLab User or Group Pages
-
-To use this project as your user/group website, you will need one additional
-step: just rename your project to `namespace.gitlab.io`, where `namespace` is
-your `username` or `groupname`. This can be done by navigating to your
-project's **Settings**.
-
-Read more about [user/group Pages][userpages] and [project Pages][projpages].
-
-## Did you fork this project?
-
-If you forked this project for your own use, please go to your project's
-**Settings** and remove the forking relationship, which won't be necessary
-unless you want to contribute back to the upstream project.
-
-## Troubleshooting
-
-1. CSS is missing! That means that you have wrongly set up the CSS URL in your
-   HTML files. Have a look at the [index.html] for an example.
-
-[ci]: https://about.gitlab.com/gitlab-ci/
-[index.html]: https://gitlab.com/pages/plain-html/blob/master/public/index.html
-[userpages]: https://docs.gitlab.com/ce/user/project/pages/introduction.html#user-or-group-pages
-[projpages]: https://docs.gitlab.com/ce/user/project/pages/introduction.html#project-pages
