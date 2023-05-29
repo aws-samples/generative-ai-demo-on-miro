@@ -20,9 +20,17 @@
 
 ### 1. Create IAM role “generative-ai-demo-function”
 
+Policies:
+- AmazonSageMakerFullAccess
+- AmazonS3FullAccess
 
 ### 2. Create IAM role “generative-ai-demo-demo-operator”
 
+Policies:
+- AWSCodeCommitPowerUser
+- AmazonSageMakerFullAccess
+- AmazonS3FullAccess
+- AmazonElasticContainerRegistryPublicFullAccess
 
 ### 3. Create CodeCommit repository and push this repository to it
 
