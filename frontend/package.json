@@ -1,13 +1,20 @@
 {
-  "name": "stickynotes-to-shapes",
-  "version": "0.0.0",
-  "scripts": {
-    "start": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
-  },
-  "devDependencies": {
-    "@mirohq/websdk-types": "latest",
-    "vite": "2.9.13"
-  }
+    "name": "frontend",
+    "version": "0.1.0",
+    "license": "MIT",
+    "scripts": {
+        "start": "vite",
+        "build": "vite build",
+        "serve": "vite preview"
+    },
+    "dependencies": {
+    },
+    "devDependencies": {
+        "@mirohq/websdk-types": "latest",
+        "@types/node": "^18.8.2",
+        "@vitejs/plugin-react": "^2.2.0",
+        "prettier": "2.8.1",
+        "typescript": "4.8.4",
+        "vite": "3.0.3"
+    }
 }

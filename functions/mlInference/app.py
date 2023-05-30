@@ -9,14 +9,17 @@ from PIL import Image, ImageDraw
 
 OUT_IMAGES_PATH = 'out_images/'
 
+
 ##########################################
-# utility functions - upload umage to S3 #
+# utility functions - upload image to S3 #
 ##########################################
 class S3ImagesInvalidExtension(Exception):
     pass
 
+
 class S3ImagesUploadFailed(Exception):
     pass
+
 
 def to_s3(s3_client, img, bucket, key):
     buffer = BytesIO()
@@ -29,7 +32,8 @@ def to_s3(s3_client, img, bucket, key):
     if sent_data['ResponseMetadata']['HTTPStatusCode'] != 200:
         raise S3ImagesUploadFailed('Failed to upload image {} to bucket {}'.format(key, bucket))
     else:
-        print("Upload sucessfully")
+        print("Upload successfully")
+
 
 def get_safe_ext(key):
     ext = os.path.splitext(key)[-1].strip('.').upper()
@@ -40,6 +44,7 @@ def get_safe_ext(key):
     else:
         raise S3ImagesInvalidExtension('Extension is invalid')
 
+
 def upload_image_to_s3(image, bucket):
     key = hashlib.sha1(bytes(str(time.time()), 'utf')).hexdigest()
     filename = os.path.join(OUT_IMAGES_PATH, key + ".jpg")
@@ -49,20 +54,14 @@ def upload_image_to_s3(image, bucket):
     to_s3(client, image, bucket, filename)
     return filename
 
-def getResponceStruct (data, statusCode=200, isBase64Encoded = True ):
-    #bodyDump = None
-    if isBase64Encoded:
-        bodyDump = base64.urlsafe_b64encode(json.dumps(data).encode()).decode()
-    else:
-        bodyDump = json.dumps(data)
 
+def get_response_struct(data, status_code=200):
     return {
         'headers': {"Content-Type": "text/json", "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Headers": "Content-Type, Access-Control-Allow-Origin, Access-Control-Allow-Methods",
-                    "Access-Control-Allow-Methods": "OPTIONS,POST,GET", "Cache-Control" : "no-cache"},
-        'statusCode': statusCode,
-        'isBase64Encoded': isBase64Encoded,
-        'body': bodyDump
+                    "Access-Control-Allow-Methods": "OPTIONS,POST,GET", "Cache-Control": "no-cache"},
+        'statusCode': status_code,
+        'body': json.dumps(data)
     }
 
 
@@ -70,49 +69,52 @@ def getResponceStruct (data, statusCode=200, isBase64Encoded = True ):
 #################################################
 # ML endpoints invocation                       #
 # Endpoint names are stored in env variables    #
-# ENDPOINT_NAME_CREATE - create image           #
-# ENDPOINT_NAME_MODIFY - modify image           #
-# ENDPOINT_NAME_STYLE_TRANSFER - style transfer #
+# IMAGE_CREATE_ENDPOINT - create image          #
+# MODIFY_ENDPOINT - modify image                #
+# STYLE_TRANSFER_ENDPOINT - style transfer      #
 # S3_BUCKET - bucket for output images          #
 # CLOUDFRONT_URL - URL for cloudfront           #
 #################################################
 
 # convert Sagemaker response to image
-def convert_to_image (response_sagemaker):
+def convert_to_image(response_sagemaker):
     response_image = response_sagemaker["Body"]
     stream = response_image.read()
     data = json.loads(stream)
 
-    responce_array = data['generated_images'][0]
+    response_array = data['generated_images'][0]
     # create Image from stream
-    new_image = Image.fromarray(np.array(responce_array).astype('uint8'), 'RGB')
+    new_image = Image.fromarray(np.array(response_array).astype('uint8'), 'RGB')
     return new_image
 
-def load_image_from_array(responce_array):
+
+def load_image_from_array(response_array):
     # create image from array
-    return Image.fromarray(np.array(responce_array).astype('uint8'), 'RGB')
+    return Image.fromarray(np.array(response_array).astype('uint8'), 'RGB')
+
 
 # upload file to S3 and return url to CloudFront
 # Environment variables
 # S3_BUCKET - S3 bucket where application could write
 # CLOUDFRONT_URL - base URL to CloudFront
-def upload_return_cf_url (image_to_upload):
+def upload_return_cf_url(image_to_upload):
     bucket = os.environ['S3_BUCKET']
     # cloudfront_url = "https://di06o62ghj1zv.cloudfront.net"
-    cloudfront_url = os.environ['CLOUDFRONT_URL']
+    # cloudfront_url = os.environ['CLOUDFRONT_URL']
 
     response_file_name = upload_image_to_s3(image_to_upload, bucket)
-    full_response_url = os.path.join(cloudfront_url, response_file_name)
+    full_response_url = response_file_name  # os.path.join(cloudfront_url, response_file_name)
     return full_response_url
+
 
 # Create image based on text
 def create_image_from_text(parameters):
     # '''
-    ENDPOINT_NAME = os.environ['ENDPOINT_NAME_CREATE']
+    endpoint_name = os.environ['IMAGE_CREATE_ENDPOINT']
     runtime = boto3.client('runtime.sagemaker')
     #
     parameters = json.loads(parameters)
-    print("Call endpoint: ", ENDPOINT_NAME)
+    print("Call endpoint: ", endpoint_name)
     print("With parameters: ", parameters)
 
     request_parameters = {}
@@ -122,7 +124,7 @@ def create_image_from_text(parameters):
             request_parameters[i] = parameters[i]
 
     encoded_text = json.dumps(request_parameters).encode("utf-8")
-    response = runtime.invoke_endpoint(EndpointName=ENDPOINT_NAME,
+    response = runtime.invoke_endpoint(EndpointName=endpoint_name,
                                        ContentType='application/json',
                                        Body=encoded_text)
     print("Received reply from endpoint, len: ", len(response))
@@ -130,28 +132,30 @@ def create_image_from_text(parameters):
     new_image = convert_to_image(response)
     return upload_return_cf_url(new_image)
 
+
 # Modify image based on text suggestion
 # TODO - refactor this function
 def modify_image(parameters):
-    ENDPOINT_NAME = os.environ['ENDPOINT_NAME_MODIFY']
+    endpoint_name = os.environ['MODIFY_ENDPOINT']
 
     runtime = boto3.client('runtime.sagemaker')
     #
-    print ("Call endpoint: ", ENDPOINT_NAME )
-    print ("With parameters: ", parameters)
-    response = runtime.invoke_endpoint(EndpointName=ENDPOINT_NAME,
+    print("Call endpoint: ", endpoint_name)
+    print("With parameters: ", parameters)
+    response = runtime.invoke_endpoint(EndpointName=endpoint_name,
                                        ContentType='application/json',
                                        Body=parameters)
-    print ("Received reply from endpoint, len: ", len(response))
+    print("Received reply from endpoint, len: ", len(response))
 
     new_image = convert_to_image(response)
     return upload_return_cf_url(new_image)
 
+
 def inpaint_image(parameters):
-    ENDPOINT_NAME = os.environ['ENDPOINT_NAME_INPAINT']
+    endpoint_name = os.environ['INPAINT_ENDPOINT']
     runtime = boto3.client('runtime.sagemaker')
     parameters = json.loads(parameters)
-    print("Call endpoint: ", ENDPOINT_NAME)
+    print("Call endpoint: ", endpoint_name)
     print("With parameters: ", parameters)
     image_url = parameters['image_url']
     prompt = parameters['prompt']
@@ -185,7 +189,7 @@ def inpaint_image(parameters):
         "guidance_scale": 7.5
     }
     encoded_text = json.dumps(parameters).encode("utf-8")
-    response = runtime.invoke_endpoint(EndpointName=ENDPOINT_NAME,
+    response = runtime.invoke_endpoint(EndpointName=endpoint_name,
                                        ContentType='application/json;jpeg',
                                        Body=encoded_text)
     print("Received reply from endpoint, len: ", len(response))
@@ -193,9 +197,10 @@ def inpaint_image(parameters):
     new_image = convert_to_image(response)
     return upload_return_cf_url(new_image)
 
+
 # Main handler
 
-def lambda_handler(event, context):
+def handler(event, context):
     """Sample pure Lambda function
 
     Parameters
@@ -218,31 +223,25 @@ def lambda_handler(event, context):
     """
 
     try:
-        if ("httpMethod" in event and event["httpMethod"] == "POST"):  # and event["httpMethod"] == "POST"
-
-            # parameters = json.loads(base64.urlsafe_b64decode(event["body"]))
-            parameters = base64.urlsafe_b64decode(event["body"])
-            print("Parameters: ", parameters)
-            command = json.loads(parameters.decode("utf-8"))
-            # Run action depending on the command
-            if (command['action'] == 'create'):
-                print("----- Action: create")
-                full_response_url = create_image_from_text(parameters)
-            elif (command['action'] == 'modify'):
-                print ("----- Action: modify")
-                full_response_url = modify_image(parameters)
-            elif (command['action'] == 'inpaint'):
-                print("----- Action: inpaint")
-                full_response_url = inpaint_image(parameters)
-            else:
-                raise Exception("invalid command action '%s'" % command['action'])
-            #
-            return getResponceStruct({"status": "ok", "responseURL": full_response_url})              # return structured answer
+        # parameters = json.loads(base64.urlsafe_b64decode(event["body"]))
+        parameters = event["body"]
+        print("Parameters: ", parameters)
+        command = json.loads(parameters)
+        # Run action depending on the command
+        if command['action'] == 'create':
+            print("----- Action: create")
+            full_response_url = create_image_from_text(parameters)
+        elif command['action'] == 'modify':
+            print("----- Action: modify")
+            full_response_url = modify_image(parameters)
+        elif command['action'] == 'inpaint':
+            print("----- Action: inpaint")
+            full_response_url = inpaint_image(parameters)
+        else:
+            raise Exception("invalid command action '%s'" % command['action'])
+        #
+        return get_response_struct({"status": "ok", "responseURL": full_response_url})  # return structured answer
 
     except Exception as e:
-        print ("-------- Exception: ", str(e))
-        return getResponceStruct({"status": "error", "reply": "Error: " + str(e) }, statusCode=200, isBase64Encoded=False)
-
-    # If HTTP Method is not POST -> return standard error
-    print ("-------- Return default reply")
-    return getResponceStruct({"reply": "Only POST requests accepted"}, statusCode=200, isBase64Encoded=False)
+        print("-------- Exception: ", str(e))
+        return get_response_struct({"status": "error", "reply": "Error: " + str(e)}, status_code=502)
