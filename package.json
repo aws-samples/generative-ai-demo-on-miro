@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "(esbuild functions/**/*.ts --bundle --minify --platform=node --target=es2020 --outdir=exporter/functions --outbase=functions)",
-    "predeploy": "(cd frontend && npm install && npm run build) && (cd ecr && npm install) && (cd deploy && npm install)",
-    "deploy": "(cd ecr && npm run deploy) && (cd backend && npm run deploy) && (cd deploy && npm run deploy)"
+    "predeploy": "(cd frontend && npm install && npm run build) && (cd functions/infrastructure/ecr && npm install) && (cd infrastructure && npm install)",
+    "deploy": "(cd functions/infrastructure/ecr && npm run deploy) && (cd functions/infrastructure/docker && npm run deploy) && (cd infrastructure && npm run deploy)"
   },
   "author": "",
   "license": "ISC",
