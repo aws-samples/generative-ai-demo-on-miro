@@ -16,6 +16,7 @@ export class ECRStack extends cdk.Stack {
             const repo = new aws_ecr.Repository(this, repo_name, {
                 repositoryName: repo_name.toLowerCase(),
                 removalPolicy: cdk.RemovalPolicy.DESTROY,
+                autoDeleteImages: true
             })
         })
     }
