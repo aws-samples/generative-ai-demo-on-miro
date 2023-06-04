@@ -6,7 +6,7 @@
   "scripts": {
     "predeploy": "(cd frontend && npm install && npm run build) && (cd functions/infrastructure/ecr && npm install) && (cd infrastructure && npm install)",
     "deploy": "(cd functions/infrastructure/ecr && npm run deploy) && (cd functions/infrastructure/docker && npm run deploy) && (cd infrastructure && npm run deploy)",
-    "destroy" : "(cd infrastructure && cdk destroy) && (cd functions/infrastructure/ecr && cdk destroy)"
+    "destroy" : "(cd ml_services && bash endpoint_names.sh && python3 delete_endpoints.py) && (cd infrastructure && cdk destroy)"
   },
   "author": "",
   "license": "ISC",

@@ -1,9 +1,7 @@
 #!/bin/bash
 
-DEFAULT_CREATE_IMAGE_ENDPOINT='jumpstart-example-infer-model-txt2img-demo-on-miro-1'
-DEFAULT_INPAINT_ENDPOINT='jumpstart-example-model-inpainting-demo-on-miro-1'
-DEFAULT_IMAGE_MODIFY_ENDPOINT='huggingface-example-model-pix2pix-demo-on-miro-1'
-DEFAULT_STYLE_TRANSFER_ENDPOINT='tensorflow-hub-example-style-transfer-demo-on-miro-1'
+# load default names for Sagemaker endpoints
+/bin/bash ../ml_services/endpoint_names.sh
 
 echo "🤖Hello, please enter the endpoint name of the image generation model [$DEFAULT_CREATE_IMAGE_ENDPOINT]:"
 read -r CREATE_IMAGE_ENDPOINT
