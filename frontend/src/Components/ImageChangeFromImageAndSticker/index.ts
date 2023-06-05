@@ -9,14 +9,14 @@ export const imageChangeFromImageAndSticker = async (connectors: any, stickers: 
         const new_x = stickers[0].x + (stickers[0].x - images[0].x)
         const new_y = stickers[0].y + (stickers[0].y - images[0].y)
 
-        const requestBody =  btoa(JSON.stringify({
+        const requestBody =  JSON.stringify({
             action: "modify",
             prompt: prompt,
             image_url: images[0].url,
             width : 512,
             height : 512,
             guidance_scale : 7
-        }))
+        })
 
         const data = await getGeneratedData(requestBody)
         await createImageOnBoard(data, 512, new_x, new_y)

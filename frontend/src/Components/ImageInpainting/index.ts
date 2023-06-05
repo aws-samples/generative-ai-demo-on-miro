@@ -30,8 +30,7 @@ export const imageInpainting = async (
     }
     console.log('New shape: ', shape_position)
 
-    const requestBody = btoa(
-        JSON.stringify({
+    const requestBody = JSON.stringify({
             action: 'inpaint',
             prompt: prompt,
             image_url: images[0].url,
@@ -40,7 +39,6 @@ export const imageInpainting = async (
             height: images[0].height,
             guidance_scale: 7,
         })
-    )
 
     const data = await getGeneratedData(requestBody)
     await createImageOnBoard(data, 512, new_x, new_y)

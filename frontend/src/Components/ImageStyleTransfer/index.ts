@@ -42,12 +42,10 @@ export const imageStyleTransfer = async (images: any, connectors: any) => {
         const new_x = content_item.x + (content_item.x - style_item.x)
         const new_y = content_item.y + (content_item.y - style_item.y)
 
-        const requestBody = btoa(
-            JSON.stringify({
+        const requestBody = JSON.stringify({
                 styleImage: style_item.url,
                 contentImage: content_item.url,
             })
-        )
 
         const data: any = await getGeneratedData(requestBody)
 

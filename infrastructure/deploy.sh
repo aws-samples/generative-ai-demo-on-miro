@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # load default names for Sagemaker endpoints
-/bin/bash ../ml_services/endpoint_names.sh
+source ../ml_services/endpoint_names.sh
 
 echo "🤖Hello, please enter the endpoint name of the image generation model [$DEFAULT_CREATE_IMAGE_ENDPOINT]:"
 read -r CREATE_IMAGE_ENDPOINT
