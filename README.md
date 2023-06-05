@@ -20,7 +20,7 @@
 To begin integrating WATool with the Miro application, follow these steps to deploy infrastructure in your AWS account:
 
 1. Configure CLI access to AWS account via [profile](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html) or [environment variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
-2. Export AWS_REGION environment variable by run `export AWS_REGION='your region here'` (i.e. `export AWS_REGION='eu-north-1'`), as Lambda function deployment script relies on that
+2. Export AWS_REGION environment variable by run `export AWS_REGION='your region here'` (i.e. `export AWS_REGION='eu-east-1'`), as Lambda function deployment script relies on that
 3. Bootstrap CDK stack in the target account: `cdk bootstrap aws://<account_id>/<region>`
 4. Docker buildx is required to build Lambda images. It could be either used from [Docker Desktop](https://www.docker.com/products/docker-desktop/) package - no need in steps 4.i and 4.ii in this case; or installed separately (steps below developed and tested on [AWS Cloud9](https://aws.amazon.com/cloud9/)):
    1. [Binary installation manual](https://docs.docker.com/build/install-buildx/)
@@ -53,3 +53,7 @@ To begin integrating WATool with the Miro application, follow these steps to dep
 6. Install the app to the team.
    ![Install App](./media/install-app.png)
 7. Back to the Miro Developer Dashboard, click "Apps" and start working with just installed app.
+
+### Sagemaker endpoints
+
+Go to **./ml_services** directory and start one-by-one all three Sagemaker endpoints
