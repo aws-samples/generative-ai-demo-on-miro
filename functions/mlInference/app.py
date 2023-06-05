@@ -71,7 +71,6 @@ def get_response_struct(data, status_code=200):
 # Endpoint names are stored in env variables    #
 # IMAGE_CREATE_ENDPOINT - create image          #
 # MODIFY_ENDPOINT - modify image                #
-# STYLE_TRANSFER_ENDPOINT - style transfer      #
 # S3_BUCKET - bucket for output images          #
 # CLOUDFRONT_URL - URL for cloudfront           #
 #################################################
@@ -99,7 +98,6 @@ def load_image_from_array(response_array):
 # CLOUDFRONT_URL - base URL to CloudFront
 def upload_return_cf_url(image_to_upload):
     bucket = os.environ['S3_BUCKET']
-    # cloudfront_url = "https://di06o62ghj1zv.cloudfront.net"
     # cloudfront_url = os.environ['CLOUDFRONT_URL']
 
     response_file_name = upload_image_to_s3(image_to_upload, bucket)
@@ -134,7 +132,6 @@ def create_image_from_text(parameters):
 
 
 # Modify image based on text suggestion
-# TODO - refactor this function
 def modify_image(parameters):
     endpoint_name = os.environ['MODIFY_ENDPOINT']
 
@@ -147,7 +144,14 @@ def modify_image(parameters):
                                        Body=parameters)
     print("Received reply from endpoint, len: ", len(response))
 
-    new_image = convert_to_image(response)
+    #new_image = convert_to_image(response)  # way for usual sagemaker endpoint reply
+    # extract image from custom endpoint reply
+    response_image = response["Body"]
+    stream = response_image.read()
+    data = json.loads(stream)
+    new_byte_io = BytesIO(base64.decodebytes(data.encode("utf-8")))
+    new_image = Image.open(new_byte_io)
+
     return upload_return_cf_url(new_image)
 
 
@@ -223,7 +227,6 @@ def handler(event, context):
     """
 
     try:
-        # parameters = json.loads(base64.urlsafe_b64decode(event["body"]))
         parameters = event["body"]
         print("Parameters: ", parameters)
         command = json.loads(parameters)

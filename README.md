@@ -1,138 +1,55 @@
-![Build Status](https://gitlab.com/pages/plain-html/badges/master/build.svg)
+## Getting Started
 
----
-## Installation steps
-1. [Create IAM role “generative-ai-demo-function”](#1-create-iam-role-generative-ai-demo-function)
-2. [Create IAM role “generative-ai-demo-demo-operator”](#2-create-iam-role-generative-ai-demo-demo-operator)
-3. [Create CodeCommit and push this GitLab Repository to CodeCommit](#3-create-codecommit-repository-and-push-this-repository-to-it)
-4. [Create ECR repository](#4-create-ecr-repository) 
-5. [Create CloudBuild pipeline & run build](#5-create-cloudbuild-configuration--run-build)
-6. [Create Lambda from ECR container](#6-create-lambda-from-ecr-repository)
-7. [Create APIGateway](#7-create-apigateway)
-8. [Create S3 bucket](#8-create-s3-bucket)
-9. [Create CloudFront distribution & update lambda variable](#9-create-cloudfront-distribution--lambda-variable)
-10. [Update S3 bucket access policy](#10-update-s3-bucket-access-policy)
-11. [Build frontend app & deploy to bucket](#11-build-frontend-app--deploy-to-bucket)
-12. [Run Sagemaker endpoint-1](#12-13-14-run-sagemaker-endpoint)
-13. Run Sagemaker endpoint-2
-14. Run Sagemaker endpoint-3
-15. [Open Miro and integrate application](#15-open-miro-and-integrate-application)
+### Deployment
 
-### 1. Create IAM role “generative-ai-demo-function”
+#### Prerequisites
 
-Policies:
-- AmazonSageMakerFullAccess
-- AmazonS3FullAccess
+1. AWS account with access to create
+    - [IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)
+    - [ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) repositories
+    - [Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
+    - [API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html) endpoints
+    - [S3 buckets](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
+    - [CloudFront distributions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html)
+2. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) installed and configured
+3. [NodeJS](https://nodejs.org/en/download/) installed
+4. [NPM](https://www.npmjs.com/get-npm) installed
+5. [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed
+6. [Docker](https://docs.docker.com/get-docker/) installed
 
-### 2. Create IAM role “generative-ai-demo-demo-operator”
+To begin integrating WATool with the Miro application, follow these steps to deploy infrastructure in your AWS account:
 
-Policies:
-- AWSCodeCommitPowerUser
-- AmazonSageMakerFullAccess
-- AmazonS3FullAccess
-- AmazonElasticContainerRegistryPublicFullAccess
+1. Configure CLI access to AWS account via [profile](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html) or [environment variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
+2. Export AWS_REGION environment variable by run `export AWS_REGION='your region here'` (i.e. `export AWS_REGION='eu-north-1'`), as Lambda function deployment script relies on that
+3. Bootstrap CDK stack in the target account: `cdk bootstrap aws://<account_id>/<region>`
+4. Docker buildx is required to build Lambda images. It could be either used from [Docker Desktop](https://www.docker.com/products/docker-desktop/) package - no need in steps 4.i and 4.ii in this case; or installed separately (steps below developed and tested on [AWS Cloud9](https://aws.amazon.com/cloud9/)):
+   1. [Binary installation manual](https://docs.docker.com/build/install-buildx/)
+   2. To enable multiarch building capability launch `docker run --rm --privileged multiarch/qemu-user-static --reset -p yes`
+5. For easy deployment just run `npm run deploy` from the project root folder. This will deploy all the necessary stacks in the target account.
 
-### 3. Create CodeCommit repository and push this repository to it
+### Miro Application
 
-Repository name: 'generative-ai-demo-on-miro'
+1. Familiarize yourself with Miro's Developer Platform:
+   Visit the Miro Developer Platform documentation (**[https://developers.miro.com/docs](https://developers.miro.com/docs)**) to learn about the available APIs, SDKs, and other resources that can help you build your app.
+2. Create [Miro Developer Team](https://developers.miro.com/docs/create-a-developer-team)
 
-### 4. Create ECR repository
-Repository name = `generative-ai-demo-on-miro`
+    ![Build App](./media/build-app-button.png)
 
-### 5. Create CloudBuild configuration & run build
-- Compute: 3 GB memory, 2 vCPUs
-- Image: `aws/codebuild/standard:5.0`
-- Role: `generative-ai-demo-demo-operator`
-- Buildspec: `backend/buildspec.yml`
-- Environment variables:
-  - `AWS_DEFAULT_REGION` = `us-east-1`
-  - `AWS_ACCOUNT_ID` = `<AWS ID>`
-  - `IMAGE_TAG` = `latest`
-  - `IMAGE_REPO_NAME` = `generative-ai-demo-on-miro`
+3. Go to the Miro Developer Dashboard (**[https://miro.com/app/dashboard/](https://miro.com/app/dashboard/)**
+   ) and click "Create new app". Fill in the necessary information about your app, such as its name, select Developer team. Note: you don't need to check the "Expire user authorization token" checkbox. Click "Create app" to create your app.
 
-### 6. Create Lambda from ECR repository
+    ![Create New App Button](./media/create-new-app.png)
 
-- Create Lambda from ECR. Name = `lambda-generative-ai-demo-on-miro`
-- Extend running time to 20s
-- Setup environment variables:
-  - `CLOUDFRONT_URL` = `<update after step 9>`
-  - `S3_BUCKET` = `generative-ai-demo-on-miro-bucket`
-  - `ENDPOINT_NAME_CREATE` = `jumpstart-example-infer-model-txt2img-demo-on-miro-1`
-  - `ENDPOINT_NAME_INPAINT` = `jumpstart-example-model-inpainting-demo-on-miro-1`
-  - `ENDPOINT_NAME_MODIFY` = `TBD`
-  - `ENDPOINT_NAME_STYLE_TRANSFER` = `TBD`
+    ![Create New App Config](./media/create-new-app-2.png)
 
-**Note:** *Names of Sagemaker endpoints are hardcoded to notebooks to simplify demo start*
+4. Please enter the CloudFront URL that you obtained after the deployment process.
 
-### 7. Create APIGateway
+    ![App Url](./media/app-url.png)
 
-- Default endpoint: `Enabled`
-- Stage name: `api`
-- Invoke URL: `https://<ENDPOINT>/api`
-- API endpoint: `https://<ENDPOINT>/api/lambda-generative-ai-demo-on-miro`
+5. Add necessary permission.
 
-### 8. Create S3 bucket
+    ![Permissions](./media/permissions.png)
 
-Bucket name = 'generative-ai-demo-on-miro-bucket'
-
-### 9. Create CloudFront distribution & lambda variable
-
-- General settings: default root object: `index.html`
-- Two origins:
-  - Origin type: S3, Point to S3 bucket, Origin access control settings -> Update S3 bucket policy
-  - Origin type: Custom origin, Point to APIGateway, protocol: match viewer
-- Behavior: Default(*), plus `/api/*` -> redirect to APIGateway origin, HTTP methods: `POST`
-
-**Don't forget to update Lambda environment variable with CloudFront URL !**
-
-### 10. Update S3 bucket access policy
-
-Setup following access policy to S3 to allow CloudFront access (example):
-```
-{
-    "Version": "2008-10-17",
-    "Id": "PolicyForCloudFrontPrivateContent",
-    "Statement": [
-        {
-            "Sid": "AllowCloudFrontServicePrincipal",
-            "Effect": "Allow",
-            "Principal": {
-                "Service": "cloudfront.amazonaws.com"
-            },
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::generative-ai-demo-on-miro-bucket/*",
-            "Condition": {
-                "StringEquals": {
-                    "AWS:SourceArn": <<__ "arn:aws:cloudfront::616815736523:distribution/E21OMBYGU2GUQC" __>>
-                }
-            }
-        }
-    ]
-}
-
-```
-
-### 11. Build frontend app & deploy to bucket
-
-Open Cloud9, enter to main catalog of git repository.
-````
-$ cd frontend
-$ npm install
-$ npm run build
-$ aws s3 rm s3://generative-ai-demo-on-miro-bucket/assets --recursive
-$ aws s3 cp dist/ s3://generative-ai-demo-on-miro-bucket --recursive
-````
-Step 4 needs to clean previous installations.
-
-### 12, 13, 14 Run Sagemaker endpoint
-
-- open Sagemaker notebook
-- run all steps
-- check if endpoint works
-
-**Don't forget delete endpoint after demo session to avoid high $$$ spend in your account !!!**
-
-### 15. Open Miro and integrate application
-
-**TBD**
-
+6. Install the app to the team.
+   ![Install App](./media/install-app.png)
+7. Back to the Miro Developer Dashboard, click "Apps" and start working with just installed app.
