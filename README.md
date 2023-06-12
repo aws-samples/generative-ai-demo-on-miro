@@ -4,11 +4,11 @@
 This demo can be easily extended by adding use-cases to demonstrate new concepts and solutions.
 
 
-| Use case               | How it looks like                                              | Details                                                                                       |
-|------------------------|----------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| 1. Image generation    | ![Image generation](./media/case-1-image_generation.png)       | Select one or several yellow stickers, then run app                                           |
-| 2. Image inpainting    | ![Image inpainting](./media/case-2-inpainting_instruction.png) | Change a part of image using **round** shape to define mask and sticky note for change prompt |
-| 3. Image trasformation | ![Image change](./media/case-3-pix2pix_result.png)             | Select image and sticky note connected by line to transform image                             |
+| Use case               | How it looks like                                           | Details                                                                                       |
+|------------------------|-------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| 1. Image generation    | ![Image generation](./media/case-1-image_generation.png)    | Select one or several yellow stickers, then run app                                           |
+| 2. Image inpainting    | ![Image inpainting](./media/case-2-inpainting_result-1.png) | Change a part of image using **round** shape to define mask and sticky note for change prompt |
+| 3. Image trasformation | ![Image change](./media/case-3-pix2pix_result.png)          | Select image and sticky note connected by line to transform image                             |
 
 Start from brainstorming and then develop your visual idea step-by-step.
 
@@ -122,5 +122,5 @@ Each use-case is supported by a separate Jupyter notebook in **`./ml_services/<u
 
 ### License
 
-This sample is licensed under the [Apache 2.0 License](http://aws.amazon.com/apache2.0/). For more details, please take a look at the [LICENSE](LICENSE.txt) file
+This sample is licensed under the [Apache 2.0 License](http://aws.amazon.com/apache2.0/). For more details, please take a look at the [LICENSE](LICENSE) file
 
