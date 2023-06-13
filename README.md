@@ -46,7 +46,7 @@ In both cases existing environment can be used as boilerplate. [More details her
 2. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) installed and configured
 3. [NodeJS](https://nodejs.org/en/download/) installed
 4. [NPM](https://www.npmjs.com/get-npm) installed
-5. [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed
+5. [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed (min. version 2.83.x is required)
 6. [Docker](https://docs.docker.com/get-docker/) installed
 
 **To begin integrating WATool with the Miro application, follow these steps to deploy infrastructure in your AWS account:**
