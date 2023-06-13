@@ -58,21 +58,17 @@ export class DeployStack extends Stack {
         })
 
         // //API GW authorizer function and permissions to get parameters from Parameter Store
-        const apiGWAuthFunction = new aws_lambda.Function(
+        //
+        const apiGWAuthFunction = new aws_lambda.DockerImageFunction(
             this,
             'APIGWAuthFunction',
             {
                 functionName: 'APIGWauthFunction',
-                runtime: aws_lambda.Runtime.FROM_IMAGE,
+                //runtime: aws_lambda.Runtime.FROM_IMAGE,
                 architecture: aws_lambda.Architecture.ARM_64,
-                code: aws_lambda.Code.fromEcrImage(
-                    aws_ecr.Repository.fromRepositoryName(
-                        this,
-                        'repoApiGwAuth',
-                        `authorize`
-                    )
-                ),
-                handler: aws_lambda.Handler.FROM_IMAGE,
+                code: aws_lambda.DockerImageCode.fromImageAsset(
+                    path.join(__dirname, '../../functions/authorize')
+                )
             }
         )
         apiGWAuthFunction.addToRolePolicy(
@@ -85,21 +81,15 @@ export class DeployStack extends Stack {
 
 
         //Onboard backend user function and permissions to put parameters to Systems Manager Parameter Store
-        const onboardFunction = new aws_lambda.Function(
+        const onboardFunction = new aws_lambda.DockerImageFunction(
             this,
             'OnboardFunction',
             {
                 functionName: 'OnboardFunction',
-                runtime: aws_lambda.Runtime.FROM_IMAGE,
                 architecture: aws_lambda.Architecture.ARM_64,
-                code: aws_lambda.Code.fromEcrImage(
-                    aws_ecr.Repository.fromRepositoryName(
-                        this,
-                        'repoUserOnboard',
-                        `onboard`
-                    )
-                ),
-                handler: aws_lambda.Handler.FROM_IMAGE,
+                code: aws_lambda.DockerImageCode.fromImageAsset(
+                    path.join(__dirname, '../../functions/onBoard')
+                )
             }
         )
         onboardFunction.addToRolePolicy(
@@ -180,19 +170,14 @@ export class DeployStack extends Stack {
             }
         )
 
-        const genAIProxyFunction = new aws_lambda.Function(
+        const genAIProxyFunction = new aws_lambda.DockerImageFunction(
             this,
             'GenAIProxyFunction',
             {
                 functionName: 'GenAIProxyFunction',
-                runtime: aws_lambda.Runtime.FROM_IMAGE,
                 architecture: aws_lambda.Architecture.ARM_64,
-                code: aws_lambda.Code.fromEcrImage(
-                    aws_ecr.Repository.fromRepositoryName(
-                        this,
-                        'genaiproxy',
-                        `genaiproxy`
-                    )
+                code: aws_lambda.DockerImageCode.fromImageAsset(
+                    path.join(__dirname, '../../functions/mlInference')
                 ),
                 environment: {
                     S3_BUCKET: assetsBucket.bucketName,
@@ -201,7 +186,6 @@ export class DeployStack extends Stack {
                     MODIFY_ENDPOINT: imageModifyEndpoint.valueAsString,
                     STYLE_TRANSFER_ENDPOINT: styleTransferEndpoint.valueAsString,
                 },
-                handler: aws_lambda.Handler.FROM_IMAGE,
                 timeout: Duration.seconds(30),
             }
         )
