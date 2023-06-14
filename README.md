@@ -55,12 +55,12 @@ In both cases existing environment can be used as boilerplate. [More details her
    
    <details>
    <summary>👇 Demo operator user/role policies </summary>
-   (steps below developed and tested in Cloud9 and Sagemaker under role with following policies)
+   (steps below developed and tested in Cloud9 and Sagemaker, role with following policies)
 
    ```
    IAMFullAccess, AmazonS3FullAccess, AmazonSSMFullAccess, 
    CloudFrontFullAccess, AmazonAPIGatewayAdministrator, AWSCloudFormationFullAccess, 
-   AWSLambda_FullAccess, AmazonElasticContainerRegistryPublicFullAccess, AmazonSageMakerFullAccess
+   AWSLambda_FullAccess, AmazonEC2ContainerRegistryFullAccess, AmazonSageMakerFullAccess
    ```
 
    </details>
@@ -69,7 +69,9 @@ In both cases existing environment can be used as boilerplate. [More details her
 3. Bootstrap CDK stack in the target account: `cdk bootstrap aws://<account_id>/<region>`
 4. Docker buildx is required to build Lambda images. It could be either used from [Docker Desktop](https://www.docker.com/products/docker-desktop/) package - no need in steps 4.i and 4.ii in this case; or installed separately (steps below developed and tested on [AWS Cloud9](https://aws.amazon.com/cloud9/)):
    1. [Binary installation manual](https://docs.docker.com/build/install-buildx/)
-   2. To enable multiarch building capability launch `docker run --rm --privileged multiarch/qemu-user-static --reset -p yes`
+   2. On x86 platform to enable multiarch building capability launch
+   
+      `docker run --rm --privileged multiarch/qemu-user-static --reset -p yes`
 5. For easy deployment just run `npm run deploy` from the project root folder. This will deploy all the necessary stacks in the target account.
 
 ### Miro Application
