@@ -144,7 +144,7 @@ def modify_image(parameters):
                                        Body=parameters)
     print("Received reply from endpoint, len: ", len(response))
 
-    #new_image = convert_to_image(response)  # way for usual sagemaker endpoint reply
+    #new_image = convert_to_image(response)  # way for usual sagemaker endpoint reply, here we need custom implementation
     # extract image from custom endpoint reply
     response_image = response["Body"]
     stream = response_image.read()
@@ -170,7 +170,8 @@ def inpaint_image(parameters):
     sh_y2 = shape_position['y'] + shape_position['height'] / 2
 
     # load image and prepare
-    image = Image.open(requests.get(image_url, stream=True).raw)
+    image = Image.open(requests.get(image_url, stream=True, timeout=5).raw)
+
     b = io.BytesIO()
     image.save(b, 'jpeg')
     encoded_input_image = base64.b64encode(bytearray(b.getvalue())).decode()
@@ -205,7 +206,7 @@ def inpaint_image(parameters):
 # Main handler
 
 def handler(event, context):
-    """Sample pure Lambda function
+    """Sample pure Lambda function - use for education when you add your extension
 
     Parameters
     ----------
