@@ -192,8 +192,8 @@ export class DeployStack extends Stack {
         genAIProxyFunction.addToRolePolicy(
             new aws_iam.PolicyStatement({
                 actions: [
-                    'sagemaker:*',
-                    's3:*'
+                    'sagemaker:InvokeEndpoint',
+                    's3:PutObject'
                 ],
                 resources: ['*'],
             })

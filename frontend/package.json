@@ -8,6 +8,7 @@
         "serve": "vite preview"
     },
     "dependencies": {
+        "semver": "^7.5.3"
     },
     "devDependencies": {
         "@mirohq/websdk-types": "latest",
@@ -15,6 +16,6 @@
         "@vitejs/plugin-react": "^2.2.0",
         "prettier": "2.8.1",
         "typescript": "4.8.4",
-        "vite": "3.0.3"
+        "vite": "3.2.7"
     }
 }
