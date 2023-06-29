@@ -49,7 +49,7 @@ In both cases existing environment can be used as boilerplate. [More details her
 5. [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed (min. version 2.83.x is required)
 6. [Docker](https://docs.docker.com/get-docker/) installed
 
-**To begin integrating WATool with the Miro application, follow these steps to deploy infrastructure in your AWS account:**
+**To begin integrating Generative AI demo application with the Miro, follow these steps to deploy infrastructure in your AWS account:**
 
 1. Configure CLI access to AWS account via [profile](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html) or [environment variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
    
@@ -82,7 +82,7 @@ In both cases existing environment can be used as boilerplate. [More details her
 
     ![Build App](./media/build-app-button.png)
 
-3. Go to the Miro Developer Dashboard (**[https://miro.com/app/dashboard/](https://miro.com/app/dashboard/)**
+3. Go to the Miro App management Dashboard (**[https://miro.com/app/settings/user-profile/apps/](https://miro.com/app/settings/user-profile/apps/)**
    ) and click "Create new app". Fill in the necessary information about your app, such as its name, select Developer team. Note: you don't need to check the "Expire user authorization token" checkbox. Click "Create app" to create your app.
 
     ![Create New App Button](./media/create-new-app.png)
