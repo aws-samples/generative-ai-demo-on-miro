@@ -1,0 +1,3 @@
+boto3==1.26.69
+botocore==1.29.69
+python-jose==3.3.0
