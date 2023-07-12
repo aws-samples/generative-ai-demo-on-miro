@@ -124,7 +124,7 @@ Each use-case is supported by a separate Jupyter notebook in **`./ml_services/<u
 
 ### License
 
-This sample is licensed under the [Apache 2.0 License](http://aws.amazon.com/apache2.0/). For more details, please take a look at the [LICENSE](LICENSE) file
+This library is licensed under the [MIT-0](https://github.com/aws/mit-0) license. For more details, please see [LICENSE](LICENSE) file
 
 ### Legal disclaimer
 
