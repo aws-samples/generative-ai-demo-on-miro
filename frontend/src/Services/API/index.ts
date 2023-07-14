@@ -30,14 +30,3 @@ export const getGeneratedData = async (requestBody: any) => {
     }
     return await response.json()
 }
-
-export const onBoarding = async () => {
-    const config = {
-        method: 'POST',
-    }
-    const response = await fetch(`/api/onboard`, config)
-    if (response.status !== 200) {
-        console.log('Server data received: ', response)
-    }
-    return await response.json()
-}

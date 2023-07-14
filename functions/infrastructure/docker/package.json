@@ -1,8 +1,0 @@
-{
-  "name": "docker-ecr",
-  "version": "0.1.0",
-  "scripts": {
-    "predeploy": "chmod +x ecr_login_build_push.sh",
-    "deploy": "./ecr_login_build_push.sh"
-  }
-}

@@ -2,9 +2,8 @@ import {
     imageGenerationFromStickers,
     imageInpainting,
     imageChangeFromImageAndSticker,
-    imageStyleTransfer
+    imageStyleTransfer,
 } from './Components'
-import { getAppData, onBoarding, setAppData } from './Services'
 // @ts-ignore
 const { board } = window.miro
 
@@ -16,15 +15,6 @@ async function init() {
     // 4 - selection: two pictures with arrow -> image style transfer
 
     board.ui.on('icon:click', async () => {
-        // check if user has been onboarded
-        const onBoardParam = 'GenAIOnBoard'
-        const onBoarded = await getAppData(onBoardParam)
-        console.log('onBoarded', onBoarded)
-        if (!onBoarded) {
-            await onBoarding()
-            await setAppData(onBoardParam, 'true')
-        }
-
         // Get selected items and filter images
         const selectedItems = await board.getSelection()
 
@@ -81,12 +71,15 @@ async function init() {
 
         // case 4 - image style transfer
         // Selected 2 images and 1 connector between them
-        if (selectedItems.length === 3 && images.length === 2 && connectors.length === 1) {
+        if (
+            selectedItems.length === 3 &&
+            images.length === 2 &&
+            connectors.length === 1
+        ) {
             console.log('running use-case 4: image style transfer')
             await imageStyleTransfer(images, connectors)
             return
         }
-
     })
 }
 

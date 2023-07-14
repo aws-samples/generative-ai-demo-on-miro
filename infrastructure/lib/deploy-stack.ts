@@ -12,14 +12,18 @@ import {
     StackProps,
     RemovalPolicy,
     CfnOutput,
-    CfnParameter
+    CfnParameter,
+    aws_secretsmanager,
 } from 'aws-cdk-lib'
+import * as cdk from "aws-cdk-lib";
 import { Construct } from 'constructs'
 import * as path from 'path'
 
 export class DeployStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps ) {
         super(scope, id, props)
+
+        const SECRET_ID = 'MiroSecret'
 
         const createImageEndpoint = new CfnParameter(this, 'CreateImageEndpoint', {
             type: 'String',
@@ -41,6 +45,11 @@ export class DeployStack extends Stack {
             description: 'Endpoint for style transfer',
         });
 
+        const clientSecret = new CfnParameter(this, 'MiroClientSecret', {
+            type: 'String',
+            description: 'Client secret for Miro application',
+        });
+
         //Bucket for assets
         const assetsBucket = new aws_s3.Bucket(this, 'AssetsBucket', {
             autoDeleteObjects: true,
@@ -57,8 +66,13 @@ export class DeployStack extends Stack {
             destinationBucket: assetsBucket,
         })
 
-        // //API GW authorizer function and permissions to get parameters from Parameter Store
-        //
+        const secret = new aws_secretsmanager.Secret(this, SECRET_ID, {
+            secretObjectValue: {
+                clientSecret: cdk.SecretValue.unsafePlainText(clientSecret.valueAsString),
+            },
+        });
+
+        // //API GW authorizer function and permissions to get parameters from Secret Manager
         const apiGWAuthFunction = new aws_lambda.DockerImageFunction(
             this,
             'APIGWAuthFunction',
@@ -70,43 +84,17 @@ export class DeployStack extends Stack {
                     path.join(__dirname, '../../functions/authorize')
                 ),
                 environment: {
-                    SSM_PARAMETER_NAME: 'MiroTeamGenAIIntegration',
+                    SECRET_ID,
                 },
             }
         )
         apiGWAuthFunction.addToRolePolicy(
             new aws_iam.PolicyStatement({
                 actions: ['ssm:GetParameter'],
-                resources: ['*'], //TODO: Replace with fine-grained access to particular parameter
+                resources: ['*'], 
             })
         )
-
-
-
-        //Onboard backend user function and permissions to put parameters to Systems Manager Parameter Store
-        const onboardFunction = new aws_lambda.DockerImageFunction(
-            this,
-            'OnboardFunction',
-            {
-                functionName: 'OnboardFunction',
-                architecture: aws_lambda.Architecture.ARM_64,
-                code: aws_lambda.DockerImageCode.fromImageAsset(
-                    path.join(__dirname, '../../functions/onBoard')
-                ),
-                environment: {
-                    SSM_PARAMETER_NAME: 'MiroTeamGenAIIntegration',
-                },
-            }
-        )
-        onboardFunction.addToRolePolicy(
-            new aws_iam.PolicyStatement({
-                actions: [
-                    'ssm:PutParameter',
-                    'ssm:GetParameter'
-                ],
-                resources: ['*'], //TODO: Replace with fine-grained access to particular parameter
-            })
-        )
+        secret.grantRead(apiGWAuthFunction);
 
         //API Gateway
         const apiGateway = new aws_apigateway.RestApi(this, 'ApiGateway', {
@@ -115,6 +103,7 @@ export class DeployStack extends Stack {
                 types: [aws_apigateway.EndpointType.REGIONAL],
             },
         })
+
         //Create API GW root path with region
         const regionResource = apiGateway.root.addResource('api')
 
@@ -129,13 +118,6 @@ export class DeployStack extends Stack {
                 ],
                 resultsCacheTtl: Duration.seconds(0),
             }
-        )
-
-        //Resource and method to onboard user
-        const resourceOnboard = regionResource.addResource('onboard')
-        resourceOnboard.addMethod(
-            'POST',
-            new aws_apigateway.LambdaIntegration(onboardFunction)
         )
 
 
