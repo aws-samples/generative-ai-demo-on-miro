@@ -4,6 +4,7 @@ import {
     imageChangeFromImageAndSticker,
     imageStyleTransfer
 } from './Components'
+import { getAppData, onBoarding, setAppData } from './Services'
 // @ts-ignore
 const { board } = window.miro
 
@@ -15,6 +16,15 @@ async function init() {
     // 4 - selection: two pictures with arrow -> image style transfer
 
     board.ui.on('icon:click', async () => {
+        // check if user has been onboarded
+        const onBoardParam = 'GenAIOnBoard'
+        const onBoarded = await getAppData(onBoardParam)
+        console.log('onBoarded', onBoarded)
+        if (!onBoarded) {
+            await onBoarding()
+            await setAppData(onBoardParam, 'true')
+        }
+
         // Get selected items and filter images
         const selectedItems = await board.getSelection()
 

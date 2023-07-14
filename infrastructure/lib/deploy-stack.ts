@@ -68,7 +68,10 @@ export class DeployStack extends Stack {
                 architecture: aws_lambda.Architecture.ARM_64,
                 code: aws_lambda.DockerImageCode.fromImageAsset(
                     path.join(__dirname, '../../functions/authorize')
-                )
+                ),
+                environment: {
+                    SSM_PARAMETER_NAME: 'MiroTeamGenAIIntegration',
+                },
             }
         )
         apiGWAuthFunction.addToRolePolicy(
@@ -89,7 +92,10 @@ export class DeployStack extends Stack {
                 architecture: aws_lambda.Architecture.ARM_64,
                 code: aws_lambda.DockerImageCode.fromImageAsset(
                     path.join(__dirname, '../../functions/onBoard')
-                )
+                ),
+                environment: {
+                    SSM_PARAMETER_NAME: 'MiroTeamGenAIIntegration',
+                },
             }
         )
         onboardFunction.addToRolePolicy(

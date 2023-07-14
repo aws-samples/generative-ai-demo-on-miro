@@ -9,8 +9,8 @@ class MiroJwtToken:
         self.payload = payload
 
 def handler(event, context):
-    region = os.getenv('AWS_REGION')
-    Name = 'miroTeam'
+    region = os.environ['AWS_REGION']
+    ssm_param_name = os.environ['SSM_PARAMETER_NAME']
     authorization_header = event['headers']['Authorization']
     jwt_token = authorization_header.split(' ')[1]
 
