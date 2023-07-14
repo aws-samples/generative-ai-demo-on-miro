@@ -7,6 +7,7 @@ import {
     aws_lambda,
     aws_s3,
     aws_s3_deployment,
+	aws_logs,
     Duration,
     Stack,
     StackProps,
@@ -41,10 +42,20 @@ export class DeployStack extends Stack {
             description: 'Endpoint for style transfer',
         });
 
+
+		//Bucket for access logs
+		const logBucket = new aws_s3.Bucket(this, 'LogBucket', {
+			removalPolicy: cdk.RemovalPolicy.RETAIN,
+			enforceSSL: true
+		});
+
         //Bucket for assets
         const assetsBucket = new aws_s3.Bucket(this, 'AssetsBucket', {
             autoDeleteObjects: true,
             removalPolicy: RemovalPolicy.DESTROY,
+			enforceSSL: true,
+			serverAccessLogsBucket: logBucket,
+			serverAccessLogsPrefix: 'assetsbucket/'
         })
 
         //Provision data in assets S3 bucket
@@ -102,12 +113,23 @@ export class DeployStack extends Stack {
             })
         )
 
+
+		//Log group for API Gateway
+		const apiLogGroup = new aws_logs.LogGroup(this, 'ApiGwLogs', {
+			logGroupName: 'generative-ai-demo-miro/apigw/BackendGateway',
+			retention: aws_logs.RetentionDays.ONE_MONTH
+		})
+
         //API Gateway
         const apiGateway = new aws_apigateway.RestApi(this, 'ApiGateway', {
             restApiName: 'BackendGateway',
             endpointConfiguration: {
                 types: [aws_apigateway.EndpointType.REGIONAL],
             },
+			deployOptions: {
+				accessLogDestination: new aws_apigateway.LogGroupLogDestination(apiLogGroup),
+				accessLogFormat: aws_apigateway.AccessLogFormat.jsonWithStandardFields()
+			}
         })
         //Create API GW root path with region
         const regionResource = apiGateway.root.addResource('api')
@@ -138,7 +160,11 @@ export class DeployStack extends Stack {
             this,
             'CFDistribution',
             {
-                defaultRootObject: 'index.html',
+				enableLogging: true,
+				logBucket: logBucket,
+				logIncludesCookies: true,
+				logFilePrefix: 'cloudfront/',
+				defaultRootObject: 'index.html',
                 defaultBehavior: {
                     origin: new aws_cloudfront_origins.S3Origin(assetsBucket),
                     allowedMethods: aws_cloudfront.AllowedMethods.ALLOW_ALL,
