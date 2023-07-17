@@ -16,9 +16,5 @@
     "@types/node": "^18.11.18",
     "esbuild": "^0.16.13",
     "prettier": "2.8.1"
-  },
-  "dependencies": {
-    "@aws-sdk/client-ssm": "^3.241.0",
-    "jsonwebtoken": "^9.0.0"
   }
 }

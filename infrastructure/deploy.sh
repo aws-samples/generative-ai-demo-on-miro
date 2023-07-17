@@ -3,7 +3,9 @@
 # load default names for Sagemaker endpoints
 source ../ml_services/endpoint_names.sh
 
-echo "🤖Hello, please enter the endpoint name of the image generation model [$DEFAULT_CREATE_IMAGE_ENDPOINT]:"
+echo "🤖Hello, please enter the application client secret which you could copy from you application in Miro. Please read instruction in README.md [$MIRO_CLIENT_TOKEN]:"
+read -r MIRO_CLIENT_TOKEN
+echo "🤖Thanks, and now let's enter the endpoint name of the image generation model [$DEFAULT_CREATE_IMAGE_ENDPOINT]:"
 read -r CREATE_IMAGE_ENDPOINT
 CREATE_IMAGE_ENDPOINT=${CREATE_IMAGE_ENDPOINT:-$DEFAULT_CREATE_IMAGE_ENDPOINT}
 echo "🤖Thanks, please enter the endpoint name of the inpainting model [$DEFAULT_INPAINT_ENDPOINT]:"
@@ -18,6 +20,7 @@ STYLE_TRANSFER_ENDPOINT=${STYLE_TRANSFER_ENDPOINT:-$DEFAULT_STYLE_TRANSFER_ENDPO
 echo "🤖Thanks, deploying... 🚀☁️"
 
 cdk deploy --require-approval never \
+  --parameters MiroClientSecret="$MIRO_CLIENT_TOKEN" \
   --parameters CreateImageEndpoint="$CREATE_IMAGE_ENDPOINT" \
   --parameters InpaintEndpoint="$INPAINT_ENDPOINT" \
   --parameters ImageModifyEndpoint="$IMAGE_MODIFY_ENDPOINT" \

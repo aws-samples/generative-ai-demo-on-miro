@@ -1,7 +1,20 @@
 // @ts-ignore
 const { board } = window.miro
+
+export const getAppData = async (name: string) => {
+    return await board.getAppData(name)
+}
+
+export const setAppData = async (name: string, value: unknown) => {
+    await board.setAppData(name, value)
+}
+
+export const getToken = async () => {
+    return await board.getIdToken()
+}
+
 export const getGeneratedData = async (requestBody: any) => {
-    const token = await board.getIdToken()
+    const token = await getToken()
     const config = {
         method: 'POST',
         headers: {

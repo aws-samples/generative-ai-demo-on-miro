@@ -22,6 +22,8 @@ export class DeployStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps ) {
         super(scope, id, props)
 
+        const SECRET_ID = 'MiroSecret'
+
         const createImageEndpoint = new CfnParameter(this, 'CreateImageEndpoint', {
             type: 'String',
             description: 'Endpoint for creating image',
@@ -42,6 +44,10 @@ export class DeployStack extends Stack {
             description: 'Endpoint for style transfer',
         });
 
+        const clientSecret = new CfnParameter(this, 'MiroClientSecret', {
+            type: 'String',
+            description: 'Client secret for Miro application',
+        });
 
 		//Bucket for access logs
 		const logBucket = new aws_s3.Bucket(this, 'LogBucket', {
@@ -68,8 +74,13 @@ export class DeployStack extends Stack {
             destinationBucket: assetsBucket,
         })
 
-        // //API GW authorizer function and permissions to get parameters from Parameter Store
-        //
+        const secret = new aws_secretsmanager.Secret(this, SECRET_ID, {
+            secretObjectValue: {
+                clientSecret: cdk.SecretValue.unsafePlainText(clientSecret.valueAsString),
+            },
+        });
+
+        // //API GW authorizer function and permissions to get parameters from Secret Manager
         const apiGWAuthFunction = new aws_lambda.DockerImageFunction(
             this,
             'APIGWAuthFunction',
@@ -79,39 +90,19 @@ export class DeployStack extends Stack {
                 architecture: aws_lambda.Architecture.ARM_64,
                 code: aws_lambda.DockerImageCode.fromImageAsset(
                     path.join(__dirname, '../../functions/authorize')
-                )
+                ),
+                environment: {
+                    SECRET_ID,
+                },
             }
         )
         apiGWAuthFunction.addToRolePolicy(
             new aws_iam.PolicyStatement({
                 actions: ['ssm:GetParameter'],
-                resources: ['*'], //TODO: Replace with fine-grained access to particular parameter
+                resources: ['*'],
             })
         )
-
-
-
-        //Onboard backend user function and permissions to put parameters to Systems Manager Parameter Store
-        const onboardFunction = new aws_lambda.DockerImageFunction(
-            this,
-            'OnboardFunction',
-            {
-                functionName: 'OnboardFunction',
-                architecture: aws_lambda.Architecture.ARM_64,
-                code: aws_lambda.DockerImageCode.fromImageAsset(
-                    path.join(__dirname, '../../functions/onBoard')
-                )
-            }
-        )
-        onboardFunction.addToRolePolicy(
-            new aws_iam.PolicyStatement({
-                actions: [
-                    'ssm:PutParameter',
-                    'ssm:GetParameter'
-                ],
-                resources: ['*'], //TODO: Replace with fine-grained access to particular parameter
-            })
-        )
+        secret.grantRead(apiGWAuthFunction);
 
 
 		//Log group for API Gateway
@@ -131,6 +122,7 @@ export class DeployStack extends Stack {
 				accessLogFormat: aws_apigateway.AccessLogFormat.jsonWithStandardFields()
 			}
         })
+
         //Create API GW root path with region
         const regionResource = apiGateway.root.addResource('api')
 
@@ -145,13 +137,6 @@ export class DeployStack extends Stack {
                 ],
                 resultsCacheTtl: Duration.seconds(0),
             }
-        )
-
-        //Resource and method to onboard user
-        const resourceOnboard = regionResource.addResource('onboard')
-        resourceOnboard.addMethod(
-            'POST',
-            new aws_apigateway.LambdaIntegration(onboardFunction)
         )
 
 
