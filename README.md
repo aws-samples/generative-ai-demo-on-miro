@@ -1,6 +1,6 @@
 ## Getting Started
 
- **This demo shows three Generative AI use-cases integrated into single solution on [Miro](https://miro.com/miro-aws/) board.** We turn Python notebooks into dynamic interactive experience, where several team members can brainstorm, explore, exchange ideas empowered by privately hosted Sagemaker generative AI models.
+ **This demo shows three Generative AI use-cases integrated into single solution on [Miro](https://miro.com/miro-aws/) board.** It turns Python notebooks into dynamic interactive experience, where several team members can brainstorm, explore, exchange ideas empowered by privately hosted Sagemaker generative AI models.
 This demo can be easily extended by adding use-cases to demonstrate new concepts and solutions.
 
 
@@ -49,7 +49,7 @@ In both cases existing environment can be used as boilerplate. [More details her
 5. [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed (min. version 2.83.x is required)
 6. [Docker](https://docs.docker.com/get-docker/) installed
 
-**To begin integrating Generative AI demo application with the Miro, follow these steps to deploy infrastructure in your AWS account:**
+### To begin setup Generative AI demo in your AWS account, follow these steps:
 
 1. Configure CLI access to AWS account via [profile](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html) or [environment variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
    
@@ -58,7 +58,7 @@ In both cases existing environment can be used as boilerplate. [More details her
    (steps below developed and tested in Cloud9 and Sagemaker, role with following policies)
 
    ```
-   IAMFullAccess, AmazonS3FullAccess, AmazonSSMFullAccess, 
+   IAMFullAccess, AmazonS3FullAccess, AmazonSSMFullAccess, CloudWatchLogsFullAccess,
    CloudFrontFullAccess, AmazonAPIGatewayAdministrator, AWSCloudFormationFullAccess, 
    AWSLambda_FullAccess, AmazonEC2ContainerRegistryFullAccess, AmazonSageMakerFullAccess
    ```
@@ -72,35 +72,55 @@ In both cases existing environment can be used as boilerplate. [More details her
    2. On x86 platform to enable multiarch building capability launch
    
       `docker run --rm --privileged multiarch/qemu-user-static --reset -p yes`
-5. For easy deployment just run `npm run deploy` from the project root folder. This will deploy all the necessary stacks in the target account.
+5. You need Miro application client secret to authorize Miro app to use backend. To get this secret start creating your application in Miro ([steps 7-10](#7-familiarize-yourself-with-miros-developer-platform-)). 
+
+6. When you see the client secret on the step 10 of **Miro application setup**, return here and just run `npm run deploy` from the project root folder. You will be requested to provide ``application client secret`` to continue installation. When installation is completed, all the necessary resources are deployed as **CloudFormation** `DeployStack` in the target account. Write down CloudFront HTTPS distrubution address:
+```
+    DeployStack.DistributionOutput = xyz123456.cloudfront.net
+```
+Now go to Miro application [step 11](#11-please-enter-the-cloudfront-url-that-you-obtained-after-the-deployment-process) to complete Miro app installation.
 
 ### Miro Application
 
-1. Familiarize yourself with Miro's Developer Platform:
+#### 7. Familiarize yourself with Miro's Developer Platform:
    Visit the Miro Developer Platform documentation (**[https://developers.miro.com/docs](https://developers.miro.com/docs)**) to learn about the available APIs, SDKs, and other resources that can help you build your app.
-2. Create [Miro Developer Team](https://developers.miro.com/docs/create-a-developer-team)
+#### 8. Create [Miro Developer Team](https://developers.miro.com/docs/create-a-developer-team)
 
-    ![Build App](./media/build-app-button.png)
 
-3. Go to the Miro App management Dashboard (**[https://miro.com/app/settings/user-profile/apps/](https://miro.com/app/settings/user-profile/apps/)**
-   ) and click "Create new app". Fill in the necessary information about your app, such as its name, select Developer team. Note: you don't need to check the "Expire user authorization token" checkbox. Click "Create app" to create your app.
+![Build App](./media/build-app-button.png)
 
-    ![Create New App Button](./media/create-new-app.png)
 
-    ![Create New App Config](./media/create-new-app-2.png)
+#### 9. Go to the Miro App management Dashboard (**[https://miro.com/app/settings/user-profile/apps/](https://miro.com/app/settings/user-profile/apps/)**) 
+and click "**Create new app**". 
 
-4. Please enter the CloudFront URL that you obtained after the deployment process.
+![Create New App Button](./media/create-new-app.png)
+Fill in the necessary information about your app, such as its name, select Developer team. Note: you don't need to check the "Expire user authorization token" checkbox. Click "**Create app**" to create your app.
 
-    ![App Url](./media/app-url.png)
+<img src="./media/create-new-app-2.png" alt="drawing" width="300"/>
 
-5. Add necessary permission.
+#### 10. Copy client secret on app creation page
 
-    ![Permissions](./media/permissions.png)
+<img src="./media/create-new-app-client-secret.png" alt="secret" width="500"/>
 
-6. Install the app to the team.
-   ![Install App](./media/install-app.png)
-7. Back to the Miro Developer Dashboard, click "More apps" icon on application bar, find your just installed app in the list and start working.
-   ![Run App](./media/miro-run-app.png)
+Then go to [step 6](#to-begin-setup-generative-ai-demo-in-your-aws-account-follow-these-steps-) to complete backend setup.
+
+#### 11. Please enter the CloudFront URL that you obtained after the deployment process.
+
+<img src="./media/app-url.png" alt="App Url" width="500"/>
+
+#### 12. Add necessary permission.
+
+<img src="./media/permissions.png" alt="Permissions" width="500"/>
+
+#### 13. Install the app to the team.
+
+<img src="./media/install-app.png" alt="Install App" width="500"/>
+
+#### 14. Back to the Miro Developer Dashboard, click "More apps" icon on application bar, find your just installed app in the list and start working.
+
+<img src="./media/miro-run-app.png" alt="Run App" width="300"/>
+
+
 
 ### Sagemaker endpoints
 

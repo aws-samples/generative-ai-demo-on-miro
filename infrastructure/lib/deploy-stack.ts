@@ -13,7 +13,9 @@ import {
     StackProps,
     RemovalPolicy,
     CfnOutput,
-    CfnParameter
+    CfnParameter,
+    aws_secretsmanager,
+    SecretValue
 } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import * as path from 'path'
@@ -51,7 +53,7 @@ export class DeployStack extends Stack {
 
 		//Bucket for access logs
 		const logBucket = new aws_s3.Bucket(this, 'LogBucket', {
-			removalPolicy: cdk.RemovalPolicy.RETAIN,
+			removalPolicy: RemovalPolicy.RETAIN,
 			enforceSSL: true
 		});
 
@@ -76,7 +78,7 @@ export class DeployStack extends Stack {
 
         const secret = new aws_secretsmanager.Secret(this, SECRET_ID, {
             secretObjectValue: {
-                clientSecret: cdk.SecretValue.unsafePlainText(clientSecret.valueAsString),
+                clientSecret: SecretValue.unsafePlainText(clientSecret.valueAsString),
             },
         });
 
@@ -92,7 +94,7 @@ export class DeployStack extends Stack {
                     path.join(__dirname, '../../functions/authorize')
                 ),
                 environment: {
-                    SECRET_ID,
+                    SECRET_ID : secret.secretName,
                 },
             }
         )
@@ -120,7 +122,8 @@ export class DeployStack extends Stack {
 			deployOptions: {
 				accessLogDestination: new aws_apigateway.LogGroupLogDestination(apiLogGroup),
 				accessLogFormat: aws_apigateway.AccessLogFormat.jsonWithStandardFields()
-			}
+			},
+            cloudWatchRole: true
         })
 
         //Create API GW root path with region

@@ -7,9 +7,14 @@ def handler(event, context):
     secret_id = os.environ['SECRET_ID']
     method_arn = event['methodArn']
     client = boto3.client('secretsmanager', region_name=region)
-    secret_string = client.get_secret_value(SecretId=secret_id)['SecretString']
+    try:
+        print("Request secret for SecretID : ", secret_id)
+        secret_string = client.get_secret_value(SecretId=secret_id)['SecretString']
 
-    if secret_string is None:
+        if secret_string is None:
+            return generate_policy(resource=method_arn)
+    except Exception as e:
+        print(e)
         return generate_policy(resource=method_arn)
 
     if event['headers']:
