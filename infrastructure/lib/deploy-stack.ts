@@ -54,7 +54,8 @@ export class DeployStack extends Stack {
 		//Bucket for access logs
 		const logBucket = new aws_s3.Bucket(this, 'LogBucket', {
 			removalPolicy: RemovalPolicy.RETAIN,
-			enforceSSL: true
+			enforceSSL: true,
+			accessControl: aws_s3.BucketAccessControl.LOG_DELIVERY_WRITE
 		});
 
         //Bucket for assets
