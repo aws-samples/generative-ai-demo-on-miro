@@ -15,17 +15,27 @@ import {
     CfnOutput,
     CfnParameter,
     aws_secretsmanager,
-    SecretValue
+    SecretValue,
 } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import * as path from 'path'
 
+interface BackendStackProps extends StackProps {
+    readonly clientAppSecret: string,
+    readonly createImageEndpointName: string,
+    readonly imageModifyEndpointName: string,
+    readonly imageInpaintEndpointName: string,
+    readonly styleTransferEndpointName: string
+}
+
+
 export class DeployStack extends Stack {
-    constructor(scope: Construct, id: string, props?: StackProps ) {
+    constructor(scope: Construct, id: string, props: BackendStackProps ) {
         super(scope, id, props)
 
-        const SECRET_ID = 'MiroSecret'
+        const SECRET_ID = 'MiroSecret' // Secretsmanager ID for app secret
 
+        /*
         const createImageEndpoint = new CfnParameter(this, 'CreateImageEndpoint', {
             type: 'String',
             description: 'Endpoint for creating image',
@@ -46,10 +56,12 @@ export class DeployStack extends Stack {
             description: 'Endpoint for style transfer',
         });
 
+
         const clientSecret = new CfnParameter(this, 'MiroClientSecret', {
             type: 'String',
             description: 'Client secret for Miro application',
         });
+        */
 
 		//Bucket for access logs
 		const logBucket = new aws_s3.Bucket(this, 'LogBucket', {
@@ -79,7 +91,7 @@ export class DeployStack extends Stack {
 
         const secret = new aws_secretsmanager.Secret(this, SECRET_ID, {
             secretObjectValue: {
-                clientSecret: SecretValue.unsafePlainText(clientSecret.valueAsString),
+                clientSecret: SecretValue.unsafePlainText(props.clientAppSecret),
             },
         });
 
@@ -196,10 +208,10 @@ export class DeployStack extends Stack {
                 ),
                 environment: {
                     S3_BUCKET: assetsBucket.bucketName,
-                    IMAGE_CREATE_ENDPOINT: createImageEndpoint.valueAsString,
-                    INPAINT_ENDPOINT: inpaintEndpoint.valueAsString,
-                    MODIFY_ENDPOINT: imageModifyEndpoint.valueAsString,
-                    STYLE_TRANSFER_ENDPOINT: styleTransferEndpoint.valueAsString,
+                    IMAGE_CREATE_ENDPOINT: props.createImageEndpointName,
+                    INPAINT_ENDPOINT: props.imageInpaintEndpointName,
+                    MODIFY_ENDPOINT: props.imageModifyEndpointName,
+                    STYLE_TRANSFER_ENDPOINT: props.styleTransferEndpointName,
                 },
                 timeout: Duration.seconds(30),
             }

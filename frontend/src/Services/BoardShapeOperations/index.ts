@@ -26,7 +26,8 @@ export const createShapeOnBoard = async (
 
             x: x, // Default value: horizontal center of the board
             y: y, // Default value: vertical center of the board
-            width: 400 // Set either 'width', or 'height'
+            width: 400, // Set either 'width', or 'height'
+            height: 400
         })
     }
 

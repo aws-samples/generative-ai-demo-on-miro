@@ -1,0 +1,7 @@
+{
+  "clientAppSecret": "ADD_MIRO_APP_CLIENT_SECRET_HERE",
+  "createImageEndpointName": "jumpstart-example-infer-model-txt2img-demo-on-miro-1",
+  "imageModifyEndpointName": "huggingface-example-model-pix2pix-demo-on-miro-1",
+  "imageInpaintEndpointName": "jumpstart-example-model-inpainting-demo-on-miro-1",
+  "styleTransferEndpointName": ""
+}

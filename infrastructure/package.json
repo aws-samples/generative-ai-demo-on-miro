@@ -8,8 +8,7 @@
         "build": "tsc",
         "watch": "tsc -w",
         "cdk": "cdk",
-        "predeploy": "chmod +x deploy.sh",
-        "deploy": "./deploy.sh"
+        "deploy": "npx cdk deploy --all --require-approval never"
     },
     "devDependencies": {
         "@types/jest": "^27.5.2",
