@@ -6,4 +6,4 @@ export {
     getToken,
 } from './API'
 export { createImageOnBoard } from './CreateImageOnBoard'
-export { createShapeOnBoard, removeItemFromBoard} from './BoardShapeOperations'
+export { createShapeOnBoard, removeItemFromBoard, findShapeOnBoard} from './BoardShapeOperations'

@@ -1,7 +1,7 @@
 import {
     createError,
     getGeneratedData,
-    createImageOnBoard, createShapeOnBoard, removeItemFromBoard,
+    createImageOnBoard, createShapeOnBoard, removeItemFromBoard, findShapeOnBoard,
 } from '../../Services'
 export const imageInpainting = async (
     shapes: any,
@@ -10,8 +10,8 @@ export const imageInpainting = async (
 ) => {
     console.log(' running use-case 4: image inpainting')
     console.log('Shape: ', shapes[0])
-    const new_x = stickers[0].x + (stickers[0].x - images[0].x)
-    const new_y = stickers[0].y + (stickers[0].y - images[0].y)
+    let new_x = stickers[0].x + (stickers[0].x - images[0].x)
+    let new_y = stickers[0].y + (stickers[0].y - images[0].y)
     if (shapes[0].shape != 'circle') {
         await createError(
             new_x,
@@ -46,17 +46,23 @@ export const imageInpainting = async (
 
     const ultimatePromise = Promise.all([tempShape, data])
     ultimatePromise.then(res => {
-        removeItemFromBoard(res[0])
+            const new_shape_pointer = findShapeOnBoard(res[0].id)
+            new_shape_pointer.then((pointer) => {
+                new_x = pointer.x
+                new_y = pointer.y
+                console.log("temporary shape after resoultion (x, y): ", new_x, new_y)
+                removeItemFromBoard(res[0])
+                const genImage = res[1]
+                if (genImage.status != 'ok') {
+                    // error handling
+                    createError(new_x, new_y, genImage.reply)
+                    return
+                } else {
+                    // create image
+                    createImageOnBoard(genImage, 512, new_x, new_y)
+                }
 
-        const genImage = res[1]
-        if (genImage.status != 'ok') {
-            // error handling
-            createError(new_x, new_y, genImage.reply)
-            return
-        } else {
-            // create image
-            createImageOnBoard(genImage, 512, new_x, new_y)
-        }
+            })
 
     })
 }

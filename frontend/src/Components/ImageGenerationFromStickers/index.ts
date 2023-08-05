@@ -3,7 +3,8 @@ import {
     createError,
     createImageOnBoard,
     createShapeOnBoard,
-    removeItemFromBoard
+    removeItemFromBoard,
+    findShapeOnBoard
 } from '../../Services'
 
 export const imageGenerationFromStickers = async (stickers: any) => {
@@ -60,17 +61,23 @@ export const imageGenerationFromStickers = async (stickers: any) => {
 
         const ultimatePromise = Promise.all([tempShape, data])
         ultimatePromise.then(res => {
-            removeItemFromBoard(res[0])
+            const new_shape_pointer = findShapeOnBoard(res[0].id)
+            new_shape_pointer.then ((pointer) => {
+                new_x = pointer.x
+                new_y = pointer.y
+                console.log("temporary shape after resoultion (x, y): ", new_x, new_y)
+                removeItemFromBoard(res[0])
+                const genImage = res[1]
+                if (genImage.status != 'ok') {
+                    // error handling
+                    createError(new_x, new_y, genImage.reply)
+                    return
+                } else {
+                    // create image
+                    createImageOnBoard(genImage, 512, new_x, new_y)
+                }
 
-            const genImage = res[1]
-            if (genImage.status != 'ok') {
-                // error handling
-                createError(new_x, new_y, genImage.reply)
-                return
-            } else {
-                // create image
-                createImageOnBoard(genImage, 512, new_x, new_y)
-            }
+            })
 
         })
     }

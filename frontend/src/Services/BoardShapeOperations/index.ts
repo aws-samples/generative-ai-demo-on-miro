@@ -30,6 +30,10 @@ export const createShapeOnBoard = async (
         })
     }
 
+export const findShapeOnBoard = async (
+    shape_id : string
+    ) => { return board.getById (shape_id) }
+
 export const removeItemFromBoard = async (
     item: object
 ) => {
