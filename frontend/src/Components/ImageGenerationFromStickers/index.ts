@@ -2,6 +2,8 @@ import {
     getGeneratedData,
     createError,
     createImageOnBoard,
+    createShapeOnBoard,
+    removeItemFromBoard
 } from '../../Services'
 
 export const imageGenerationFromStickers = async (stickers: any) => {
@@ -45,14 +47,32 @@ export const imageGenerationFromStickers = async (stickers: any) => {
             guidance_scale: 7,
         })
 
-        const data: any = await getGeneratedData(requestData)
+        // create temporary shape on the board
+        // send request to generate image
+        // create Promise.all
+        // upon resolution:
+        //      - take coordinates from shape promise and delete shape
+        //      - check status of generation
+        //      - if status == 'ok' create image
+        //      - if status != 'ok' create error message
+        const tempShape = createShapeOnBoard("<p><strong>WAIT</strong></p><p>5-7 sec</p>", "octagon", new_x, new_y)
+        const data: any = getGeneratedData(requestData)
 
-        // error handling
-        if (data.status != 'ok') {
-            await createError(new_x, new_y, data.reply)
-            return
-        } else {
-            await createImageOnBoard(data, 512, new_x, new_y)
-        }
+        const ultimatePromise = Promise.all([tempShape, data])
+        ultimatePromise.then(res => {
+            const new_x = res[0].x
+            const new_y = res[0].y
+            removeItemFromBoard(res[0])
+
+            const genImage = res[1]
+            if (genImage.status != 'ok') {
+                // error handling
+                createError(new_x, new_y, genImage.reply)
+                return
+            } else {
+                // create image
+                createImageOnBoard(genImage, 512, new_x, new_y)
+            }
+        })
     }
 }
