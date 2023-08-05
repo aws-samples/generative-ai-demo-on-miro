@@ -51,7 +51,7 @@ export const imageGenerationFromStickers = async (stickers: any) => {
         // send request to generate image
         // create Promise.all
         // upon resolution:
-        //      - take coordinates from shape promise and delete shape
+        //      - (take coordinates from shape promise - not working yet) and delete shape
         //      - check status of generation
         //      - if status == 'ok' create image
         //      - if status != 'ok' create error message
@@ -60,8 +60,6 @@ export const imageGenerationFromStickers = async (stickers: any) => {
 
         const ultimatePromise = Promise.all([tempShape, data])
         ultimatePromise.then(res => {
-            const new_x = res[0].x
-            const new_y = res[0].y
             removeItemFromBoard(res[0])
 
             const genImage = res[1]
@@ -73,6 +71,7 @@ export const imageGenerationFromStickers = async (stickers: any) => {
                 // create image
                 createImageOnBoard(genImage, 512, new_x, new_y)
             }
+
         })
     }
 }

@@ -7,7 +7,7 @@ export const createShapeOnBoard = async (
     x: number,
     y: number
 ) => {
-        return await board.board.createShape({
+        return await board.createShape({
             content: title,
             shape: type,
             style: {
@@ -33,5 +33,5 @@ export const createShapeOnBoard = async (
 export const removeItemFromBoard = async (
     item: object
 ) => {
-        await board.board.remove(item)
+        await board.remove(item)
     }
