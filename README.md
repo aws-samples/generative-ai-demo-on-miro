@@ -20,14 +20,14 @@ Start from brainstorming and then develop your visual idea step-by-step.
 
 - **Miro application** is running on the board. Loaded from S3 bucket, accessed via CloudFront distribution. Written on TypeScript.
 - **Authorization and AIML proxy lambdas.** Accessed via APIGateway deployed behind CloudFront. Written on Python.
-   - ***Authorization functions `authorize` and `onBoard`*** provide access to backend functions only for Miro team members. It's used to protect organization data and generated content in AWS account.
-   - ***AIML proxy function `mlInference`*** is required to handle API call from application and redirect it to correct Sagemaker inference endpoint. It also can be used for more complex use-cases, when several AIML functions could be used.
+   - ***Authorization function `authorize`*** provide access to backend functions only for authorized Miro application. It's used to protect organization data and generated content in AWS account.
+   - ***AIML proxy function `mlInference`*** is required to handle API call from application and redirect it to correct Sagemaker inference endpoint. It also can be used for more complex use-cases, when several AIML functions work.
 - **Sagemaker inference endpoints.** Run inference.
  
 ![Architecture](./media/app_architecture_overview.png)
 
 The demo could be extended in two ways: 
-1. by adding AIML use cases. 
+1. by adding new AIML use cases. 
 2. by changing/empowering interface on Miro board or Web-interface.
 
 In both cases existing environment can be used as boilerplate. [More details here](#demo-extension-with-additional-use-cases) 
@@ -49,9 +49,32 @@ In both cases existing environment can be used as boilerplate. [More details her
 5. [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed (min. version 2.83.x is required)
 6. [Docker](https://docs.docker.com/get-docker/) installed
 
-### To begin setup Generative AI demo in your AWS account, follow these steps:
+## To begin setup Generative AI demo in your AWS account, follow these steps:
 
-1. Configure CLI access to AWS account via [profile](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html) or [environment variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
+### Start with creating Miro application
+
+#### 1. Familiarize yourself with Miro's Developer Platform:
+   Visit the Miro Developer Platform documentation (**[https://developers.miro.com/docs](https://developers.miro.com/docs)**) to learn about the available APIs, SDKs, and other resources that can help you build your app.
+#### 2. Create [Miro Developer Team](https://developers.miro.com/docs/create-a-developer-team)
+💡 If you already have ***Miro Developer Team*** in you account, skip this step.
+
+![Build App](./media/build-app-button.png)
+
+
+#### 3. Go to the Miro App management Dashboard (**[https://miro.com/app/settings/user-profile/apps/](https://miro.com/app/settings/user-profile/apps/)**) 
+and click "**Create new app**". 
+
+![Create New App Button](./media/create-new-app.png)
+Fill in the necessary information about your app, such as its name, select Developer team. Note: you don't need to check the "Expire user authorization token" checkbox. Click "**Create app**" to create your app.
+
+<img src="./media/create-new-app-2.png" alt="drawing" width="300"/>
+
+#### 4. Copy client secret on app creation page
+
+<img src="./media/create-new-app-client-secret.png" alt="secret" width="500"/>
+
+### Now everything ready to set up backend
+#### 5. Configure CLI access to AWS account via [profile](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html) or [environment variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
    
    <details>
    <summary>👇 Demo operator user/role policies </summary>
@@ -65,46 +88,34 @@ In both cases existing environment can be used as boilerplate. [More details her
 
    </details>
 
-2. Export AWS_REGION environment variable by run `export AWS_REGION='your region here'` (i.e. `export AWS_REGION='eu-east-1'`), as Lambda function deployment script relies on that
-3. Bootstrap CDK stack in the target account: `cdk bootstrap aws://<account_id>/<region>`
-4. Docker buildx is required to build Lambda images. It could be either used from [Docker Desktop](https://www.docker.com/products/docker-desktop/) package - no need in steps 4.i and 4.ii in this case; or installed separately (steps below developed and tested on [AWS Cloud9](https://aws.amazon.com/cloud9/)):
+#### 6. Export AWS_REGION environment variable 
+
+Run `export AWS_REGION='your region here'` (i.e. `export AWS_REGION='eu-east-1'`), it required for Lambda function deployment script
+#### 7. Bootstrap CDK stack in the target account: 
+`cdk bootstrap aws://<account_id>/<region>`
+
+#### 8. Docker buildx is required to build Graviton2 Lambda images on x86 platform. 
+It could be either used from [Docker Desktop](https://www.docker.com/products/docker-desktop/) package - no need in steps 4.i and 4.ii in this case; or installed separately (steps below developed and tested on [AWS Cloud9](https://aws.amazon.com/cloud9/)):
    1. [Binary installation manual](https://docs.docker.com/build/install-buildx/)
    2. On x86 platform to enable multiarch building capability launch
    
       `docker run --rm --privileged multiarch/qemu-user-static --reset -p yes`
-5. You need Miro application client secret to authorize Miro app to use backend. To get this secret start creating your application in Miro ([steps 7-10](#7-familiarize-yourself-with-miros-developer-platform-)). 
 
-6. When you see the client secret on the step 10 of **Miro application setup**, return here and just run `npm run deploy` from the project root folder. You will be requested to provide ``application client secret`` to continue installation. When installation is completed, all the necessary resources are deployed as **CloudFormation** `DeployStack` in the target account. Write down CloudFront HTTPS distrubution address:
+#### 9. Configure Miro application client secret 
+Edit `deployment-config.json` to authorize Miro application to access backend. Find the following parameter and put as value secret string you received in [step 4](#4-copy-client-secret-on-app-creation-page).
+```
+"clientAppSecret": "ADD_MIRO_APP_CLIENT_SECRET_HERE",
+```
+
+#### 10. Deploy backend
+Run `npm run deploy` from the project root folder. You will be requested to provide ``application client secret`` to continue installation. When installation is completed, all the necessary resources are deployed as **CloudFormation** `DeployStack` in the target account. Write down CloudFront HTTPS distrubution address:
 ```
     DeployStack.DistributionOutput = xyz123456.cloudfront.net
 ```
-Now go to Miro application [step 11](#11-please-enter-the-cloudfront-url-that-you-obtained-after-the-deployment-process) to complete Miro app installation.
-
-### Miro Application
-
-#### 7. Familiarize yourself with Miro's Developer Platform:
-   Visit the Miro Developer Platform documentation (**[https://developers.miro.com/docs](https://developers.miro.com/docs)**) to learn about the available APIs, SDKs, and other resources that can help you build your app.
-#### 8. Create [Miro Developer Team](https://developers.miro.com/docs/create-a-developer-team)
 
 
-![Build App](./media/build-app-button.png)
-
-
-#### 9. Go to the Miro App management Dashboard (**[https://miro.com/app/settings/user-profile/apps/](https://miro.com/app/settings/user-profile/apps/)**) 
-and click "**Create new app**". 
-
-![Create New App Button](./media/create-new-app.png)
-Fill in the necessary information about your app, such as its name, select Developer team. Note: you don't need to check the "Expire user authorization token" checkbox. Click "**Create app**" to create your app.
-
-<img src="./media/create-new-app-2.png" alt="drawing" width="300"/>
-
-#### 10. Copy client secret on app creation page
-
-<img src="./media/create-new-app-client-secret.png" alt="secret" width="500"/>
-
-Then go to [step 6](#to-begin-setup-generative-ai-demo-in-your-aws-account-follow-these-steps-) to complete backend setup.
-
-#### 11. Please enter the CloudFront URL that you obtained after the deployment process.
+#### 11. Return to Miro application creation dialog to complete app configuration
+Please enter the CloudFront URL that you obtained on the previous step.
 
 <img src="./media/app-url.png" alt="App Url" width="500"/>
 
