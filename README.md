@@ -3,6 +3,9 @@
  **This demo shows three Generative AI use-cases integrated into single solution on [Miro](https://miro.com/miro-aws/) board.** It turns Python notebooks into dynamic interactive experience, where several team members can brainstorm, explore, exchange ideas empowered by privately hosted Sagemaker generative AI models.
 This demo can be easily extended by adding use-cases to demonstrate new concepts and solutions.
 
+![Demo](./media/genai-demo-960x540_low_fps.gif)
+
+**Usage guide:**
 
 | Use case               | How it looks like                                           | Details                                                                                       |
 |------------------------|-------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
@@ -88,46 +91,44 @@ Fill in the necessary information about your app, such as its name, select Devel
 
    </details>
 
-#### 6. Export AWS_REGION environment variable 
 
-Run `export AWS_REGION='your region here'` (i.e. `export AWS_REGION='eu-east-1'`), it required for Lambda function deployment script
-#### 7. Bootstrap CDK stack in the target account: 
+#### 6. Bootstrap CDK stack in the target account: 
 `cdk bootstrap aws://<account_id>/<region>`
 
-#### 8. Docker buildx is required to build Graviton2 Lambda images on x86 platform. 
-It could be either used from [Docker Desktop](https://www.docker.com/products/docker-desktop/) package - no need in steps 4.i and 4.ii in this case; or installed separately (steps below developed and tested on [AWS Cloud9](https://aws.amazon.com/cloud9/)):
+#### 7. Docker buildx is required to build Graviton2 Lambda images on x86 platform. 
+It could be either used from [Docker Desktop](https://www.docker.com/products/docker-desktop/) package - no need in steps 7.1 and 7.2 in this case; or installed separately (steps below developed and tested on [AWS Cloud9](https://aws.amazon.com/cloud9/)):
    1. [Binary installation manual](https://docs.docker.com/build/install-buildx/)
    2. On x86 platform to enable multiarch building capability launch
    
       `docker run --rm --privileged multiarch/qemu-user-static --reset -p yes`
 
-#### 9. Configure Miro application client secret 
+#### 8. Configure Miro application client secret 
 Edit `deployment-config.json` to authorize Miro application to access backend. Find the following parameter and put as value secret string you received in [step 4](#4-copy-client-secret-on-app-creation-page).
 ```
 "clientAppSecret": "ADD_MIRO_APP_CLIENT_SECRET_HERE",
 ```
 
-#### 10. Deploy backend
+#### 9. Deploy backend
 Run `npm run deploy` from the project root folder. You will be requested to provide ``application client secret`` to continue installation. When installation is completed, all the necessary resources are deployed as **CloudFormation** `DeployStack` in the target account. Write down CloudFront HTTPS distrubution address:
 ```
     DeployStack.DistributionOutput = xyz123456.cloudfront.net
 ```
 
 
-#### 11. Return to Miro application creation dialog to complete app configuration
+#### 10. Return to Miro application creation dialog to complete app configuration
 Please enter the CloudFront URL that you obtained on the previous step.
 
 <img src="./media/app-url.png" alt="App Url" width="500"/>
 
-#### 12. Add necessary permission.
+#### 11. Add necessary permission.
 
 <img src="./media/permissions.png" alt="Permissions" width="500"/>
 
-#### 13. Install the app to the team.
+#### 12. Install the app to the team.
 
 <img src="./media/install-app.png" alt="Install App" width="500"/>
 
-#### 14. Back to the Miro Developer Dashboard, click "More apps" icon on application bar, find your just installed app in the list and start working.
+#### Back to the Miro Developer Dashboard, click "More apps" icon on application bar, find your just installed app in the list and start working.
 
 <img src="./media/miro-run-app.png" alt="Run App" width="300"/>
 
