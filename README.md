@@ -3,15 +3,17 @@
  **This demo shows three Generative AI use-cases integrated into single solution on [Miro](https://miro.com/miro-aws/) board.** It turns Python notebooks into dynamic interactive experience, where several team members can brainstorm, explore, exchange ideas empowered by privately hosted Sagemaker generative AI models.
 This demo can be easily extended by adding use-cases to demonstrate new concepts and solutions.
 
-![Demo](./media/genai-demo-960x540_low_fps.gif)
+<p   align="center">
+<img src="./media/genai-demo-960x540_low_fps.gif">
+</p>
 
-**Usage guide:**
+**Usage instructions:**
 
-| Use case               | How it looks like                                           | Details                                                                                       |
-|------------------------|-------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| 1. Image generation    | ![Image generation](./media/case-1-image_generation.png)    | Select one or several yellow stickers, then run app                                           |
-| 2. Image inpainting    | ![Image inpainting](./media/case-2-inpainting_result-1.png) | Change a part of image using **round** shape to define mask and sticky note for change prompt |
-| 3. Image trasformation | ![Image change](./media/case-3-pix2pix_result.png)          | Select image and sticky note connected by line to transform image                             |
+| Use case               | How it looks like                                           | Details                                                                                                                                                                                              |
+|------------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1. Image generation    | ![Image generation](./media/case-1-image_generation.png)    | **To generate new image:** Select one or several yellow stickers with prompts, then run the app.                                                                                                     |
+| 2. Image inpainting    | ![Image inpainting](./media/case-2-inpainting_result-1.png) | **To transform a part of image:** Define changing part of image using **round** shape, add a sticky note with change prompt, connect image and sticky note, then select all 4 items and run the app. |
+| 3. Image trasformation | ![Image change](./media/case-3-pix2pix_result.png)          | **To transform image:** Select image and sticky note with transformation prompt connected by line, then run the app.                                                                                 |
 
 Start from brainstorming and then develop your visual idea step-by-step.
 
