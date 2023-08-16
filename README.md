@@ -7,6 +7,7 @@ This demo can be easily extended by adding use-cases to demonstrate new concepts
 <img src="./media/genai-demo-960x540_low_fps.gif">
 </p>
 
+
 **Usage instructions:**
 
 | Use case               | How it looks like                                           | Details                                                                                                                                                                                              |
