@@ -17,3 +17,4 @@ node_modules
 
 # VS Code local config files
 .vscode/
+package-lock.json

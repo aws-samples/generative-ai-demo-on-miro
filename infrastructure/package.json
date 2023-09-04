@@ -2,7 +2,7 @@
     "name": "deploy",
     "version": "0.1.0",
     "bin": {
-        "deployStack": "bin/deploy.ts"
+        "deployStack": "bin/generativeAIDemoOnMiro.ts"
     },
     "scripts": {
         "build": "tsc",
