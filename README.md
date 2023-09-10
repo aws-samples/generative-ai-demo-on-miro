@@ -44,7 +44,6 @@ In both cases existing environment can be used as boilerplate. [More details her
 
 1. AWS account with access to create
     - [IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)
-    - [ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) repositories
     - [Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
     - [API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html) endpoints
     - [S3 buckets](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
@@ -52,7 +51,7 @@ In both cases existing environment can be used as boilerplate. [More details her
 2. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) installed and configured
 3. [NodeJS](https://nodejs.org/en/download/) installed
 4. [NPM](https://www.npmjs.com/get-npm) installed
-5. [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed (min. version 2.83.x is required)
+5. [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html) installed (min. version 2.94.x is required)
 6. [Docker](https://docs.docker.com/get-docker/) installed
 
 ## To begin setup Generative AI demo in your AWS account, follow these steps:
@@ -89,7 +88,7 @@ Fill in the necessary information about your app, such as its name, select Devel
    ```
    IAMFullAccess, AmazonS3FullAccess, AmazonSSMFullAccess, CloudWatchLogsFullAccess,
    CloudFrontFullAccess, AmazonAPIGatewayAdministrator, AWSCloudFormationFullAccess, 
-   AWSLambda_FullAccess, AmazonEC2ContainerRegistryFullAccess, AmazonSageMakerFullAccess
+   AWSLambda_FullAccess, AmazonSageMakerFullAccess
    ```
 
    </details>
