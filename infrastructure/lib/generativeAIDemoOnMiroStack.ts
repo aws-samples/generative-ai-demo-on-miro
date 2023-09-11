@@ -15,6 +15,7 @@ import {
     aws_secretsmanager,
     SecretValue,
 } from 'aws-cdk-lib'
+import * as aws_lambda_python from '@aws-cdk/aws-lambda-python-alpha'
 import { Construct } from 'constructs'
 import * as path from 'path'
 
@@ -67,15 +68,13 @@ export class DeployStack extends Stack {
         })
 
         // //API GW authorizer function and permissions to get parameters from Secret Manager
-        const apiGWAuthFunction = new aws_lambda.DockerImageFunction(
+        const apiGWAuthFunction = new aws_lambda_python.PythonFunction(
             this,
             'APIGWAuthFunction',
             {
-                functionName: 'APIGWauthFunction',
-                architecture: aws_lambda.Architecture.ARM_64,
-                code: aws_lambda.DockerImageCode.fromImageAsset(
-                    path.join(__dirname, '../../functions/authorize')
-                ),
+                index: 'app.py',
+                entry:  path.join(__dirname, '../../functions/authorize'),
+                runtime: aws_lambda.Runtime.PYTHON_3_9,
                 environment: {
                     SECRET_ID: secret.secretName,
                 },
@@ -89,9 +88,32 @@ export class DeployStack extends Stack {
         )
         secret.grantRead(apiGWAuthFunction)
 
+        const genAIProxyFunction = new aws_lambda_python.PythonFunction(
+            this,
+            'GenAIProxyFunction',
+            {
+                index: 'app.py',
+                entry:  path.join(__dirname, '../../functions/mlInference'),
+                runtime: aws_lambda.Runtime.PYTHON_3_9,
+                environment: {
+                    S3_BUCKET: assetsBucket.bucketName,
+                    IMAGE_CREATE_ENDPOINT: props.createImageEndpointName,
+                    INPAINT_ENDPOINT: props.imageInpaintEndpointName,
+                    MODIFY_ENDPOINT: props.imageModifyEndpointName,
+                    STYLE_TRANSFER_ENDPOINT: props.styleTransferEndpointName,
+                },
+                timeout: Duration.seconds(90),
+            }
+        )
+        genAIProxyFunction.addToRolePolicy(
+            new aws_iam.PolicyStatement({
+                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject'],
+                resources: ['*'],
+            })
+        )
+
         //Log group for API Gateway
-        const apiLogGroup = new aws_logs.LogGroup(this, 'ApiGwLogs', {
-            logGroupName: 'generative-ai-demo-miro/apigw/BackendGateway',
+        const apiLogGroup = new aws_logs.LogGroup(this, 'GenerativeAIDemoApiGwLogs', {
             retention: aws_logs.RetentionDays.ONE_MONTH,
         })
 
@@ -168,31 +190,6 @@ export class DeployStack extends Stack {
             }
         )
 
-        const genAIProxyFunction = new aws_lambda.DockerImageFunction(
-            this,
-            'GenAIProxyFunction',
-            {
-                functionName: 'GenAIProxyFunction',
-                architecture: aws_lambda.Architecture.ARM_64,
-                code: aws_lambda.DockerImageCode.fromImageAsset(
-                    path.join(__dirname, '../../functions/mlInference')
-                ),
-                environment: {
-                    S3_BUCKET: assetsBucket.bucketName,
-                    IMAGE_CREATE_ENDPOINT: props.createImageEndpointName,
-                    INPAINT_ENDPOINT: props.imageInpaintEndpointName,
-                    MODIFY_ENDPOINT: props.imageModifyEndpointName,
-                    STYLE_TRANSFER_ENDPOINT: props.styleTransferEndpointName,
-                },
-                timeout: Duration.seconds(30),
-            }
-        )
-        genAIProxyFunction.addToRolePolicy(
-            new aws_iam.PolicyStatement({
-                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject'],
-                resources: ['*'],
-            })
-        )
         const resourceGenAIProxy = regionResource.addResource('gen-ai-proxy')
         resourceGenAIProxy.addMethod(
             'POST',
