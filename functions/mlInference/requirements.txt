@@ -6,5 +6,5 @@ Pillow==9.5.0
 python-dateutil==2.8.2
 s3transfer==0.6.1
 six==1.16.0
-urllib3==1.26.16
+urllib3==1.26.17
 requests
