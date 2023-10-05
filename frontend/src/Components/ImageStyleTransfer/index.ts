@@ -1,5 +1,5 @@
 import {
-    getGeneratedData,
+    getStyleTransferredImage,
     createError,
     createImageOnBoard,
 } from '../../Services'
@@ -43,11 +43,11 @@ export const imageStyleTransfer = async (images: any, connectors: any) => {
         const new_y = content_item.y + (content_item.y - style_item.y)
 
         const requestBody = JSON.stringify({
-                styleImage: style_item.url,
-                contentImage: content_item.url,
-            })
+            styleImage: style_item.url,
+            contentImage: content_item.url,
+        })
 
-        const data: any = await getGeneratedData(requestBody)
+        const data: any = await getStyleTransferredImage(requestBody)
 
         await createImageOnBoard(data, content_item.width, new_x, new_y)
     } // end of content creation

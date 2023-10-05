@@ -1,10 +1,10 @@
 import {
-    getGeneratedData,
+    getCreatedImage,
     createError,
     createImageOnBoard,
     createShapeOnBoard,
     removeItemFromBoard,
-    findShapeOnBoard
+    findShapeOnBoard,
 } from '../../Services'
 
 export const imageGenerationFromStickers = async (stickers: any) => {
@@ -56,16 +56,25 @@ export const imageGenerationFromStickers = async (stickers: any) => {
         //      - check status of generation
         //      - if status == 'ok' create image
         //      - if status != 'ok' create error message
-        const tempShape = createShapeOnBoard("<p><strong>WAIT</strong></p><p>5-7 sec</p>", "octagon", new_x, new_y)
-        const data: any = getGeneratedData(requestData)
+        const tempShape = createShapeOnBoard(
+            '<p><strong>WAIT</strong></p><p>5-7 sec</p>',
+            'octagon',
+            new_x,
+            new_y
+        )
+        const data: any = getCreatedImage(requestData)
 
         const ultimatePromise = Promise.all([tempShape, data])
-        ultimatePromise.then(res => {
+        ultimatePromise.then((res) => {
             const new_shape_pointer = findShapeOnBoard(res[0].id)
-            new_shape_pointer.then ((pointer) => {
+            new_shape_pointer.then((pointer) => {
                 new_x = pointer.x
                 new_y = pointer.y
-                console.log("temporary shape after resoultion (x, y): ", new_x, new_y)
+                console.log(
+                    'temporary shape after resoultion (x, y): ',
+                    new_x,
+                    new_y
+                )
                 removeItemFromBoard(res[0])
                 const genImage = res[1]
                 if (genImage.status != 'ok') {
@@ -76,9 +85,7 @@ export const imageGenerationFromStickers = async (stickers: any) => {
                     // create image
                     createImageOnBoard(genImage, 512, new_x, new_y)
                 }
-
             })
-
         })
     }
 }

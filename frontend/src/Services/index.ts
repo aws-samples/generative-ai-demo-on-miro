@@ -1,9 +1,16 @@
 export { createError } from './Error'
 export {
-    getGeneratedData,
+    getCreatedImage,
+    getModifiedImage,
+    getInPaintedImage,
+    getStyleTransferredImage,
     getAppData,
     setAppData,
     getToken,
 } from './API'
 export { createImageOnBoard } from './CreateImageOnBoard'
-export { createShapeOnBoard, removeItemFromBoard, findShapeOnBoard} from './BoardShapeOperations'
+export {
+    createShapeOnBoard,
+    removeItemFromBoard,
+    findShapeOnBoard,
+} from './BoardShapeOperations'

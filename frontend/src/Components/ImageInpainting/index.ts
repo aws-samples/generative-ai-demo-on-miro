@@ -1,7 +1,10 @@
 import {
     createError,
-    getGeneratedData,
-    createImageOnBoard, createShapeOnBoard, removeItemFromBoard, findShapeOnBoard,
+    getInPaintedImage,
+    createImageOnBoard,
+    createShapeOnBoard,
+    removeItemFromBoard,
+    findShapeOnBoard,
 } from '../../Services'
 export const imageInpainting = async (
     shapes: any,
@@ -31,38 +34,45 @@ export const imageInpainting = async (
     console.log('New shape: ', shape_position)
 
     const requestBody = JSON.stringify({
-            action: 'inpaint',
-            prompt: prompt,
-            image_url: images[0].url,
-            shape_position: shape_position,
-            width: images[0].width,
-            height: images[0].height,
-            guidance_scale: 7,
-        })
+        action: 'inpaint',
+        prompt: prompt,
+        image_url: images[0].url,
+        shape_position: shape_position,
+        width: images[0].width,
+        height: images[0].height,
+        guidance_scale: 7,
+    })
 
     // create temporary shape on the board
-    const tempShape = createShapeOnBoard("<p><strong>WAIT</strong></p><p>5-7 sec</p>", "octagon", new_x, new_y)
-    const data: any = getGeneratedData(requestBody)
+    const tempShape = createShapeOnBoard(
+        '<p><strong>WAIT</strong></p><p>5-7 sec</p>',
+        'octagon',
+        new_x,
+        new_y
+    )
+    const data: any = getInPaintedImage(requestBody)
 
     const ultimatePromise = Promise.all([tempShape, data])
-    ultimatePromise.then(res => {
-            const new_shape_pointer = findShapeOnBoard(res[0].id)
-            new_shape_pointer.then((pointer) => {
-                new_x = pointer.x
-                new_y = pointer.y
-                console.log("temporary shape after resoultion (x, y): ", new_x, new_y)
-                removeItemFromBoard(res[0])
-                const genImage = res[1]
-                if (genImage.status != 'ok') {
-                    // error handling
-                    createError(new_x, new_y, genImage.reply)
-                    return
-                } else {
-                    // create image
-                    createImageOnBoard(genImage, 512, new_x, new_y)
-                }
-
-            })
-
+    ultimatePromise.then((res) => {
+        const new_shape_pointer = findShapeOnBoard(res[0].id)
+        new_shape_pointer.then((pointer) => {
+            new_x = pointer.x
+            new_y = pointer.y
+            console.log(
+                'temporary shape after resoultion (x, y): ',
+                new_x,
+                new_y
+            )
+            removeItemFromBoard(res[0])
+            const genImage = res[1]
+            if (genImage.status != 'ok') {
+                // error handling
+                createError(new_x, new_y, genImage.reply)
+                return
+            } else {
+                // create image
+                createImageOnBoard(genImage, 512, new_x, new_y)
+            }
+        })
     })
 }
