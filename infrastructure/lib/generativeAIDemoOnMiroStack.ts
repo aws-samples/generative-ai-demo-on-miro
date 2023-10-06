@@ -86,8 +86,8 @@ export class DeployStack extends Stack {
         )
         secret.grantRead(apiGWAuthFunction)
 
-        const lambdaLayer = new aws_lambda_python.PythonLayerVersion(this, 'LambdaLayer', {
-            entry: path.join(__dirname, '../../functions/lambda_layer'),
+        const imageGenerationLambdaLayer = new aws_lambda_python.PythonLayerVersion(this, 'imageGenerationLambdaLayer', {
+            entry: path.join(__dirname, '../../functions/layers/image_generation_lambda_layer'),
             compatibleRuntimes: [aws_lambda.Runtime.PYTHON_3_8],
             compatibleArchitectures: [aws_lambda.Architecture.ARM_64],
         })
@@ -104,7 +104,7 @@ export class DeployStack extends Stack {
                     IMAGE_CREATE_ENDPOINT: props.createImageEndpointName,
                 },
                 timeout: Duration.seconds(90),
-                layers: [lambdaLayer],
+                layers: [imageGenerationLambdaLayer],
             }
         )
         createImageFunction.addToRolePolicy(
@@ -126,7 +126,7 @@ export class DeployStack extends Stack {
                     MODIFY_ENDPOINT: props.imageModifyEndpointName,
                 },
                 timeout: Duration.seconds(90),
-                layers: [lambdaLayer],
+                layers: [imageGenerationLambdaLayer],
             }
         )
         modifyImageFunction.addToRolePolicy(
@@ -148,7 +148,7 @@ export class DeployStack extends Stack {
                     INPAINT_ENDPOINT: props.imageInpaintEndpointName,
                 },
                 timeout: Duration.seconds(90),
-                layers: [lambdaLayer],
+                layers: [imageGenerationLambdaLayer],
             }
         )
         inPaintImageFunction.addToRolePolicy(
