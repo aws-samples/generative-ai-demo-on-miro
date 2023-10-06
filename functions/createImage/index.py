@@ -1,32 +1,56 @@
 import os
-import boto3
 import json
-from layer.utils import convert_to_image, upload_return_cf_url, get_response_struct
+from layer.utils import convert_sagemaker_response_to_image, upload_return_cf_url, get_response_struct, \
+    get_bedrock_response, get_sagemaker_response, convert_bedrock_response_to_image, negative_prompts
 
 
 def create_image_from_text(parameters):
     endpoint_name = os.environ['IMAGE_CREATE_ENDPOINT']
-    runtime = boto3.client('runtime.sagemaker')
-    parameters = json.loads(parameters)
+    bedrock_model_name = os.environ['BEDROCK_MODEL_NAME']
+    bedrock_region = os.environ['BEDROCK_REGION']
 
-    request_parameters = {}
-    for i in ['prompt', 'negative_prompt', 'seed']:
-        if i in parameters:
-            request_parameters[i] = parameters[i]
+    new_image = None
 
-    request_parameters["negative_prompt"] = 'f{request_parameters["negative_prompt"]}, bad, deformed, ugly, bad anatomy'
-    encoded_text = json.dumps(request_parameters).encode("utf-8")
-    response = runtime.invoke_endpoint(EndpointName=endpoint_name,
-                                       ContentType='application/json',
-                                       Body=encoded_text)
+    if bedrock_model_name != "" and bedrock_region != "":
+        prompt = parameters["prompt"]
 
-    new_image = convert_to_image(response)
+        # (e.g. photographic, digital-art, cinematic, ...)
+        style_preset = parameters[
+            "style_preset"] if "style_preset" in parameters else "photographic"
+
+        print("Negative prompts: ", negative_prompts)
+        request_body = json.dumps({
+            "text_prompts": (
+                    [{"text": prompt, "weight": 1.0}]
+                    + [{"text": n_prompt, "weight": -1.0} for n_prompt in negative_prompts]
+            ),
+            "seed": parameters["seed"],
+            "cfg_scale": 5,
+            "steps": 70,
+            "style_preset": style_preset,
+        })
+        response = get_bedrock_response(bedrock_region, bedrock_model_name, request_body)
+        new_image = convert_bedrock_response_to_image(response)
+
+    if endpoint_name != "" and new_image is None:
+        request_body = json.dumps({
+            "prompt": parameters["prompt"],
+            "negative_prompt": 'f{parameters["negative_prompt"]}, bad, deformed, ugly, bad anatomy',
+            "seed": parameters["seed"]
+        })
+        response = get_sagemaker_response(endpoint_name, request_body)
+        new_image = convert_sagemaker_response_to_image(response)
+
+    if new_image is None:
+        raise Exception("No response from sagemaker endpoint or bedrock")
+
     return upload_return_cf_url(new_image)
 
 
 def handler(event, context):
     try:
-        parameters = event["body"]
+        body = event["body"]
+        parameters = json.loads(body)
         full_response_url = create_image_from_text(parameters)
         return get_response_struct({"status": "ok", "responseURL": full_response_url})  # return structured answer
     except Exception as e:

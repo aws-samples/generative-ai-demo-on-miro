@@ -15,6 +15,7 @@ export const imageInpainting = async (
     console.log('Shape: ', shapes[0])
     let new_x = stickers[0].x + (stickers[0].x - images[0].x)
     let new_y = stickers[0].y + (stickers[0].y - images[0].y)
+    const seed = Math.floor(Math.random() * 10000000) + 1
     if (shapes[0].shape != 'circle') {
         await createError(
             new_x,
@@ -41,6 +42,7 @@ export const imageInpainting = async (
         width: images[0].width,
         height: images[0].height,
         guidance_scale: 7,
+        seed: seed,
     })
 
     // create temporary shape on the board

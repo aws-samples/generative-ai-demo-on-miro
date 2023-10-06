@@ -1,11 +1,9 @@
 import json
 import os
-import boto3
 import base64
 import requests
-from io import BytesIO
-from PIL import Image
-from layer.utils import upload_return_cf_url, get_response_struct, convert_to_image
+from layer.utils import upload_return_cf_url, get_response_struct, convert_sagemaker_response_to_image, \
+    get_bedrock_response, get_sagemaker_response, convert_bedrock_response_to_image, negative_prompts
 
 
 def encode_img_from_url(img_url):
@@ -20,35 +18,50 @@ def encode_img_from_url(img_url):
 
 def modify_image(parameters):
     endpoint_name = os.environ['MODIFY_ENDPOINT']
+    bedrock_model_name = os.environ['BEDROCK_MODEL_NAME']
+    bedrock_region = os.environ['BEDROCK_REGION']
 
-    runtime = boto3.client('runtime.sagemaker')
-    print("Call endpoint: ", endpoint_name)
-    print("With parameters: ", parameters)
-    parameters = json.loads(parameters)
-    request_parameters = json.dumps({
-        "prompt": parameters["prompt"],
-        "image": encode_img_from_url(parameters["image_url"]),
-        "negative_prompt": "bad, deformed, ugly, bad anatomy",
-        "guidance_scale": parameters["guidance_scale"],
-    })
-    response = runtime.invoke_endpoint(EndpointName=endpoint_name,
-                                       ContentType="application/json",
-                                       Accept="application/json",
-                                       Body=request_parameters)
-    print("Received reply from endpoint, len: ", len(response))
+    new_image = None
 
-    response_image = response["Body"]
-    stream = response_image.read()
-    data = json.loads(stream)
-    base_64_img_str = data['generated_images'][0]
-    new_image = Image.open(BytesIO(base64.decodebytes(bytes(base_64_img_str, "utf-8"))))
+    if bedrock_model_name != "" and bedrock_region != "":
+        prompt = parameters["prompt"]
+
+        request_body = json.dumps({
+            "text_prompts": (
+                    [{"text": prompt, "weight": 1.0}]
+                    + [{"text": n_prompt, "weight": -1.0} for n_prompt in negative_prompts]
+            ),
+            "init_image": encode_img_from_url(parameters["image_url"]),
+            "init_image_mode": "IMAGE_STRENGTH",
+            "image_strength": 0.35,
+            "cfg_scale": 5,
+            "steps": 70,
+            "seed": parameters["seed"],
+        })
+        response = get_bedrock_response(bedrock_region, bedrock_model_name, request_body)
+        new_image = convert_bedrock_response_to_image(response)
+
+    if endpoint_name != "" and new_image is None:
+        parameters = json.loads(parameters)
+        request_body = json.dumps({
+            "prompt": parameters["prompt"],
+            "image": encode_img_from_url(parameters["image_url"]),
+            "negative_prompt": "bad, deformed, ugly, bad anatomy",
+            "guidance_scale": parameters["guidance_scale"],
+        })
+        response = get_sagemaker_response(endpoint_name, request_body)
+        new_image = convert_sagemaker_response_to_image(response)
+
+    if new_image is None:
+        raise Exception("No response from sagemaker endpoint or bedrock")
 
     return upload_return_cf_url(new_image)
 
 
 def handler(event, context):
     try:
-        parameters = event["body"]
+        body = event["body"]
+        parameters = json.loads(body)
         print("Parameters: ", parameters)
         full_response_url = modify_image(parameters)
         return get_response_struct({"status": "ok", "responseURL": full_response_url})  # return structured answer

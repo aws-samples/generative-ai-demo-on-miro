@@ -20,7 +20,7 @@ export const imageChangeFromImageAndSticker = async (
         const prompt = stickers[0].content.replaceAll(/<\/?[^>]+(>|$)/gi, '')
         let new_x = stickers[0].x + (stickers[0].x - images[0].x)
         let new_y = stickers[0].y + (stickers[0].y - images[0].y)
-
+        const seed = Math.floor(Math.random() * 10000000) + 1
         const requestBody = JSON.stringify({
             action: 'modify',
             prompt: prompt,
@@ -28,6 +28,7 @@ export const imageChangeFromImageAndSticker = async (
             width: 512,
             height: 512,
             guidance_scale: 7,
+            seed: seed,
         })
 
         // create temporary shape on the board

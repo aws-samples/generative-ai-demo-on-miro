@@ -24,6 +24,8 @@ interface BackendStackProps extends StackProps {
     readonly createImageEndpointName: string
     readonly imageModifyEndpointName: string
     readonly imageInpaintEndpointName: string
+    readonly bedrockImageModelName: string
+    readonly bedrockRegion: string
 }
 
 export class DeployStack extends Stack {
@@ -102,6 +104,8 @@ export class DeployStack extends Stack {
                 environment: {
                     S3_BUCKET: assetsBucket.bucketName,
                     IMAGE_CREATE_ENDPOINT: props.createImageEndpointName,
+                    BEDROCK_MODEL_NAME: props.bedrockImageModelName,
+                    BEDROCK_REGION: props.bedrockRegion,
                 },
                 timeout: Duration.seconds(90),
                 layers: [imageGenerationLambdaLayer],
@@ -109,7 +113,7 @@ export class DeployStack extends Stack {
         )
         createImageFunction.addToRolePolicy(
             new aws_iam.PolicyStatement({
-                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject'],
+                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject', 'bedrock:*'],
                 resources: ['*'],
             })
         )
@@ -124,6 +128,8 @@ export class DeployStack extends Stack {
                 environment: {
                     S3_BUCKET: assetsBucket.bucketName,
                     MODIFY_ENDPOINT: props.imageModifyEndpointName,
+                    BEDROCK_MODEL_NAME: props.bedrockImageModelName,
+                    BEDROCK_REGION: props.bedrockRegion,
                 },
                 timeout: Duration.seconds(90),
                 layers: [imageGenerationLambdaLayer],
@@ -131,7 +137,7 @@ export class DeployStack extends Stack {
         )
         modifyImageFunction.addToRolePolicy(
             new aws_iam.PolicyStatement({
-                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject'],
+                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject', 'bedrock:*'],
                 resources: ['*'],
             })
         )
@@ -146,6 +152,8 @@ export class DeployStack extends Stack {
                 environment: {
                     S3_BUCKET: assetsBucket.bucketName,
                     INPAINT_ENDPOINT: props.imageInpaintEndpointName,
+                    BEDROCK_MODEL_NAME: props.bedrockImageModelName,
+                    BEDROCK_REGION: props.bedrockRegion,
                 },
                 timeout: Duration.seconds(90),
                 layers: [imageGenerationLambdaLayer],
@@ -153,7 +161,7 @@ export class DeployStack extends Stack {
         )
         inPaintImageFunction.addToRolePolicy(
             new aws_iam.PolicyStatement({
-                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject'],
+                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject', 'bedrock:*'],
                 resources: ['*'],
             })
         )

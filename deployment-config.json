@@ -2,5 +2,7 @@
   "clientAppSecret": "YOUR_MIRO_APP_CLIENT_SECRET",
   "createImageEndpointName": "jumpstart-dft-stabilityai-stable-diffusion-v2",
   "imageModifyEndpointName": "jumpstart-dft-sd-2-depth-fp16",
-  "imageInpaintEndpointName": "jumpstart-dft-sd-2-inpainting-fp16"
+  "imageInpaintEndpointName": "jumpstart-dft-sd-2-inpainting-fp16",
+  "bedrockImageModelName": "ADD_BEDROCK_IMAGE_ID",
+  "bedrockRegion": "ADD_BEDROCK_REGION"
 }
