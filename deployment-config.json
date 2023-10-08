@@ -1,7 +1,8 @@
 {
-  "clientAppSecret": "ADD_MIRO_APP_CLIENT_SECRET_HERE",
-  "createImageEndpointName": "jumpstart-example-infer-model-txt2img-demo-on-miro-1",
-  "imageModifyEndpointName": "huggingface-example-model-pix2pix-demo-on-miro-1",
-  "imageInpaintEndpointName": "jumpstart-example-model-inpainting-demo-on-miro-1",
-  "styleTransferEndpointName": ""
+  "clientAppSecret": "YOUR_MIRO_APP_CLIENT_SECRET",
+  "createImageEndpointName": "jumpstart-dft-stabilityai-stable-diffusion-v2",
+  "imageModifyEndpointName": "jumpstart-dft-sd-2-depth-fp16",
+  "imageInpaintEndpointName": "jumpstart-dft-sd-2-inpainting-fp16",
+  "bedrockImageModelName": "ADD_BEDROCK_IMAGE_ID",
+  "bedrockRegion": "ADD_BEDROCK_REGION"
 }
