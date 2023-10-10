@@ -42,7 +42,6 @@ def modify_image(parameters):
         new_image = convert_bedrock_response_to_image(response)
 
     if endpoint_name != "" and new_image is None:
-        parameters = json.loads(parameters)
         request_body = json.dumps({
             "prompt": parameters["prompt"],
             "image": encode_img_from_url(parameters["image_url"]),
