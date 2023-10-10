@@ -10,11 +10,11 @@ This demo can be easily extended by adding use-cases to demonstrate new concepts
 
 **Usage instructions:**
 
-| Use case               | How it looks like                                           | Details                                                                                                                                                                                              |
-|------------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1. Image generation    | ![Image generation](./media/case-1-image_generation.png)    | **To generate new image:** Select one or several yellow stickers with prompts, then run the app.                                                                                                     |
-| 2. Image inpainting    | ![Image inpainting](./media/case-2-inpainting_result-1.png) | **To transform a part of image:** Define changing part of image using **round** shape, add a sticky note with change prompt, connect image and sticky note, then select all 4 items and run the app. |
-| 3. Image trasformation | ![Image change](./media/case-3-pix2pix_result.png)          | **To transform image:** Select image and sticky note with transformation prompt connected by line, then run the app.                                                                                 |
+| Use case               | How it looks like             | SageMaker JumpStart models    | Details                                                                                                                                                                                              |
+|------------------------|-------------------------------|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1. Image generation    | ![Image generation](./media/case-1-image_generation.png)  | Stable Diffusion 2.1          | **To generate new image:** Select one or several yellow stickers with prompts, then run the app.                                                                                                     |
+| 2. Image inpainting    | ![Image inpainting](./media/case-2-inpainting_result-1.png) | Stable Diffusion 2 Inpainting  | **To transform a part of image:** Define changing part of image using **round** shape, add a sticky note with change prompt, connect image and sticky note, then select all 4 items and run the app. |
+| 3. Image trasformation | ![Image change](./media/case-3-pix2pix_result.png)      | Stable Diffusion 2 Depth FP16 | **To transform image:** Select image and sticky note with transformation prompt connected by line, then run the app.                                                                                 |
 
 Start from brainstorming and then develop your visual idea step-by-step.
 
@@ -137,17 +137,26 @@ Please enter the CloudFront URL that you obtained on the previous step.
 
 
 ### Sagemaker endpoints
+**You need to run dedicated Sagemaker endpoint for each use case.**
+- `1-create_image` image generation with Stable diffusion 2.1 in SageMaker JumpStart
+- `2-inpaint_image` image inpainting with Stable diffusion 2 Inpainting fp16 in SageMaker JumpStart
+- `3-modify_image` image modification with Stable Diffusion 2 Depth FP16 in SageMaker JumpStart
 
+### [Legacy]
 **You need to run dedicated Sagemaker endpoint for each use case.**
 Each use-case is supported by a separate Jupyter notebook in **`./ml_services/<use_case>`** subdirectory:
 - `1-create_image` image generation (Stable diffusion 2.1), based on [this example](https://github.com/aws/studio-lab-examples/blob/main/generative-deep-learning/stable-diffusion-finetune/JumpStart_Stable_Diffusion_Inference_Only.ipynb)
 - `2-inpaint_image` image inpainting (Stable diffusion 2 Inpainting fp16), based on [this example](https://github.com/aws/amazon-sagemaker-examples/blob/main/introduction_to_amazon_algorithms/jumpstart_inpainting/Amazon_JumpStart_Inpainting.ipynb)
 - `3-modify_image` image pix2pix modification (Huggingface instruct pix2pix), based on [this example](https://github.com/aws/amazon-sagemaker-examples/tree/main/advanced_functionality/huggingface_deploy_instructpix2pix)
 
- 💡 ***These steps developed and tested in Sagemaker notebook. For cases 1 and 2 you also can use any other ways to run Jumpstart referenced models, i.e. Sagemaker Studio***
-
-
 #### Starting Sagemaker endpoints
+
+- Access SageMaker Studio in your account
+- Navigate to SageMaker JumpStart
+- Search and Select one of Models [Stable Diffusion 2.1, Stable Diffusion 2 Inpainting, Stable Diffusion 2 Depth FP16]
+- In **Deploy section** click deploy button.
+
+#### [Legacy]
 
 - Go to **./ml_services/<use_case>** directory and run one-by-one all three Sagemaker notebooks.
 - After endpoint started and successfully tested in notebook, go to **Miro board**, select required items and run use-case.

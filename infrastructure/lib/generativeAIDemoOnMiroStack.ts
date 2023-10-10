@@ -24,7 +24,8 @@ interface BackendStackProps extends StackProps {
     readonly createImageEndpointName: string
     readonly imageModifyEndpointName: string
     readonly imageInpaintEndpointName: string
-    readonly styleTransferEndpointName: string
+    readonly bedrockImageModelName: string
+    readonly bedrockRegion: string
 }
 
 export class DeployStack extends Stack {
@@ -72,9 +73,8 @@ export class DeployStack extends Stack {
             this,
             'APIGWAuthFunction',
             {
-                index: 'app.py',
                 entry:  path.join(__dirname, '../../functions/authorize'),
-                runtime: aws_lambda.Runtime.PYTHON_3_9,
+                runtime: aws_lambda.Runtime.PYTHON_3_8,
                 environment: {
                     SECRET_ID: secret.secretName,
                 },
@@ -88,26 +88,80 @@ export class DeployStack extends Stack {
         )
         secret.grantRead(apiGWAuthFunction)
 
-        const genAIProxyFunction = new aws_lambda_python.PythonFunction(
+        const imageGenerationLambdaLayer = new aws_lambda_python.PythonLayerVersion(this, 'imageGenerationLambdaLayer', {
+            entry: path.join(__dirname, '../../functions/layers/image_generation_lambda_layer'),
+            compatibleRuntimes: [aws_lambda.Runtime.PYTHON_3_8],
+            compatibleArchitectures: [aws_lambda.Architecture.ARM_64],
+        })
+
+        const createImageFunction = new aws_lambda_python.PythonFunction(
             this,
-            'GenAIProxyFunction',
+            'CreateImageFunction',
             {
-                index: 'app.py',
-                entry:  path.join(__dirname, '../../functions/mlInference'),
-                runtime: aws_lambda.Runtime.PYTHON_3_9,
+                entry:  path.join(__dirname, '../../functions/createImage'),
+                runtime: aws_lambda.Runtime.PYTHON_3_8,
+                architecture: aws_lambda.Architecture.ARM_64,
                 environment: {
                     S3_BUCKET: assetsBucket.bucketName,
                     IMAGE_CREATE_ENDPOINT: props.createImageEndpointName,
-                    INPAINT_ENDPOINT: props.imageInpaintEndpointName,
-                    MODIFY_ENDPOINT: props.imageModifyEndpointName,
-                    STYLE_TRANSFER_ENDPOINT: props.styleTransferEndpointName,
+                    BEDROCK_MODEL_NAME: props.bedrockImageModelName,
+                    BEDROCK_REGION: props.bedrockRegion,
                 },
                 timeout: Duration.seconds(90),
+                layers: [imageGenerationLambdaLayer],
             }
         )
-        genAIProxyFunction.addToRolePolicy(
+        createImageFunction.addToRolePolicy(
             new aws_iam.PolicyStatement({
-                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject'],
+                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject', 'bedrock:*'],
+                resources: ['*'],
+            })
+        )
+
+        const modifyImageFunction = new aws_lambda_python.PythonFunction(
+            this,
+            'ModifyImageFunction',
+            {
+                entry:  path.join(__dirname, '../../functions/modifyImage'),
+                runtime: aws_lambda.Runtime.PYTHON_3_8,
+                architecture: aws_lambda.Architecture.ARM_64,
+                environment: {
+                    S3_BUCKET: assetsBucket.bucketName,
+                    MODIFY_ENDPOINT: props.imageModifyEndpointName,
+                    BEDROCK_MODEL_NAME: props.bedrockImageModelName,
+                    BEDROCK_REGION: props.bedrockRegion,
+                },
+                timeout: Duration.seconds(90),
+                layers: [imageGenerationLambdaLayer],
+            }
+        )
+        modifyImageFunction.addToRolePolicy(
+            new aws_iam.PolicyStatement({
+                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject', 'bedrock:*'],
+                resources: ['*'],
+            })
+        )
+
+        const inPaintImageFunction = new aws_lambda_python.PythonFunction(
+            this,
+            'InPaintImageFunction',
+            {
+                entry:  path.join(__dirname, '../../functions/inpaintImage'),
+                runtime: aws_lambda.Runtime.PYTHON_3_8,
+                architecture: aws_lambda.Architecture.ARM_64,
+                environment: {
+                    S3_BUCKET: assetsBucket.bucketName,
+                    INPAINT_ENDPOINT: props.imageInpaintEndpointName,
+                    BEDROCK_MODEL_NAME: props.bedrockImageModelName,
+                    BEDROCK_REGION: props.bedrockRegion,
+                },
+                timeout: Duration.seconds(90),
+                layers: [imageGenerationLambdaLayer],
+            }
+        )
+        inPaintImageFunction.addToRolePolicy(
+            new aws_iam.PolicyStatement({
+                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject', 'bedrock:*'],
                 resources: ['*'],
             })
         )
@@ -190,10 +244,30 @@ export class DeployStack extends Stack {
             }
         )
 
-        const resourceGenAIProxy = regionResource.addResource('gen-ai-proxy')
-        resourceGenAIProxy.addMethod(
+        const resourceCreateImageProxy = regionResource.addResource('create-image-proxy')
+        resourceCreateImageProxy.addMethod(
             'POST',
-            new aws_apigateway.LambdaIntegration(genAIProxyFunction),
+            new aws_apigateway.LambdaIntegration(createImageFunction),
+            {
+                authorizationType: aws_apigateway.AuthorizationType.CUSTOM,
+                authorizer: authorizer,
+            }
+        )
+
+        const resourceModifyImageProxy = regionResource.addResource('modify-image-proxy')
+        resourceModifyImageProxy.addMethod(
+            'POST',
+            new aws_apigateway.LambdaIntegration(modifyImageFunction),
+            {
+                authorizationType: aws_apigateway.AuthorizationType.CUSTOM,
+                authorizer: authorizer,
+            }
+        )
+
+        const resourceInPaintImageProxy = regionResource.addResource('inpaint-image-proxy')
+        resourceInPaintImageProxy.addMethod(
+            'POST',
+            new aws_apigateway.LambdaIntegration(inPaintImageFunction),
             {
                 authorizationType: aws_apigateway.AuthorizationType.CUSTOM,
                 authorizer: authorizer,
