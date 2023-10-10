@@ -3,7 +3,9 @@ import {
     imageInpainting,
     imageChangeFromImageAndSticker,
     imageStyleTransfer,
-} from './Components'
+	brainstormingIdeasSummarization,
+	brainstormingSummaryCommentByRole
+} from '../../../../generative-ai-demo-on-miro/frontend/src/Components'
 // @ts-ignore
 const { board } = window.miro
 
@@ -17,6 +19,8 @@ async function init() {
     board.ui.on('icon:click', async () => {
         // Get selected items and filter images
         const selectedItems = await board.getSelection()
+
+		console.log('SelectedItems equals: ', selectedItems)
 
         const images = selectedItems.filter(
             (item: { type: string }) => item.type === 'image'
@@ -32,6 +36,10 @@ async function init() {
         const shapes = selectedItems.filter(
             (item: { type: string }) => item.type === 'shape'
         )
+
+		const cards = selectedItems.filter(
+			(item: { type: string }) => item.type === 'card'
+		)
 
         // case 1 - image generation from stickers
         // selected any number of stickers
@@ -80,6 +88,31 @@ async function init() {
             await imageStyleTransfer(images, connectors)
             return
         }
+
+		// case 5 - brainstorming ideas summarization
+		// Selected 1 card and at least 2 stickers but without connectors
+		if (
+			selectedItems.length >= 2 &&
+			cards.length === 1 &&
+			connectors.length === 0
+		) {
+			console.log('running use-case 5: brainstorming ideas summarization')
+			await brainstormingIdeasSummarization(stickers, cards)
+			return
+		}
+
+		// case 6 - brainstorming summary comments by role
+		// Selected 1 card, 1 sticker and 1 connector
+		if (
+			selectedItems.length === 3 &&
+			cards.length === 1 &&
+			connectors.length ===1
+		) {
+			console.log('running use-case 6: brainstorming summary comments by role')
+			await brainstormingSummaryCommentByRole(cards, connectors, stickers)
+			return
+		}
+
     })
 }
 

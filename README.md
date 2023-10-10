@@ -1,36 +1,26 @@
 ## Getting Started
 
- **This demo shows three Generative AI use-cases integrated into single solution on [Miro](https://miro.com/miro-aws/) board.** It turns Python notebooks into dynamic interactive experience, where several team members can brainstorm, explore, exchange ideas empowered by privately hosted Sagemaker generative AI models.
+** This is a temporary branch with code for Generative brainstorming usecase - will be merged to main **
+The case representing AI assistant for brainstorming sessions with two options - summarize brainstorming ideas and comment summary from various roles perspective.
 This demo can be easily extended by adding use-cases to demonstrate new concepts and solutions.
 
-<p   align="center">
-<img src="./media/genai-demo-960x540_low_fps.gif">
-</p>
-
+<img src="./media/generative-brainstorming.png" alt="App example"/>
 
 **Usage instructions:**
 
-| Use case               | How it looks like                                           | Details                                                                                                                                                                                              |
-|------------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1. Image generation    | ![Image generation](./media/case-1-image_generation.png)    | **To generate new image:** Select one or several yellow stickers with prompts, then run the app.                                                                                                     |
-| 2. Image inpainting    | ![Image inpainting](./media/case-2-inpainting_result-1.png) | **To transform a part of image:** Define changing part of image using **round** shape, add a sticky note with change prompt, connect image and sticky note, then select all 4 items and run the app. |
-| 3. Image trasformation | ![Image change](./media/case-3-pix2pix_result.png)          | **To transform image:** Select image and sticky note with transformation prompt connected by line, then run the app.                                                                                 |
+| Use case                            |  Details                                                                                                                                                                         |
+|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1. Brainstoming ideas summarization | **To generate brainstorming summary:** Select card with brainstorming topic and all yellow stickers with ideas, and run the app.                                                 |
+| 2. Comment to summary by role       | **To generate comment by role:** Create sticky note with role name, connect it to card with summary; select card with summary, sticky note with role, connector and run the app. |
 
 Start from brainstorming and then develop your visual idea step-by-step.
-
- 💡 ***Tips: you can use resulted image from previous step as an input for the next.***
-
-![Supercase](./media/supercase-continue-steps_result.png)
 
 ### Architecture overview
 
 - **Miro application** is running on the board. Loaded from S3 bucket, accessed via CloudFront distribution. Written on TypeScript.
 - **Authorization and AIML proxy lambdas.** Accessed via APIGateway deployed behind CloudFront. Written on Python.
    - ***Authorization function `authorize`*** provide access to backend functions only for authorized Miro application. It's used to protect organization data and generated content in AWS account.
-   - ***AIML proxy function `mlInference`*** is required to handle API call from application and redirect it to correct Sagemaker inference endpoint. It also can be used for more complex use-cases, when several AIML functions work.
-- **Sagemaker inference endpoints.** Run inference.
- 
-![Architecture](./media/app_architecture_overview.png)
+   - ***AIML proxy function `mlInferenceText`*** is required to handle API call from application and redirect it to the Bedrock API endpoint. It also can be used for more complex use-cases, when several AIML functions work.
 
 The demo could be extended in two ways: 
 1. by adding new AIML use cases. 

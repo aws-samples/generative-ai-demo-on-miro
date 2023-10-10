@@ -25,6 +25,7 @@ interface BackendStackProps extends StackProps {
     readonly imageModifyEndpointName: string
     readonly imageInpaintEndpointName: string
     readonly styleTransferEndpointName: string
+    readonly textProcessingEndpointName: string
 }
 
 export class DeployStack extends Stack {
@@ -67,7 +68,7 @@ export class DeployStack extends Stack {
             },
         })
 
-        // //API GW authorizer function and permissions to get parameters from Secret Manager
+        // API GW authorizer function and permissions to get parameters from Secret Manager
         const apiGWAuthFunction = new aws_lambda_python.PythonFunction(
             this,
             'APIGWAuthFunction',
@@ -112,6 +113,24 @@ export class DeployStack extends Stack {
             })
         )
 
+        const genAITextProxyFunction = new aws_lambda.Function(this, 'GenAIProxyTextFunction', {
+            functionName: 'GenAIProxyTextFunction',
+            runtime: aws_lambda.Runtime.FROM_IMAGE,
+            code: aws_lambda.Code.fromAssetImage(path.join(__dirname, '../../functions/mlInferenceText/')),
+            handler: aws_lambda.Handler.FROM_IMAGE,
+            timeout: Duration.seconds(30),
+            environment: {
+                'MODELID': "anthropic.claude-v2",
+                'MAXTOKENS': "1000"
+            }
+        });
+        genAITextProxyFunction.addToRolePolicy(
+            new aws_iam.PolicyStatement({
+                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject', 'bedrock:*'], // TODO: Remove Sagemaker and S3 permissions, fine-grained permissions for bedrock
+                resources: ['*'],
+            })
+        )
+
         //Log group for API Gateway
         const apiLogGroup = new aws_logs.LogGroup(this, 'GenerativeAIDemoApiGwLogs', {
             retention: aws_logs.RetentionDays.ONE_MONTH,
@@ -134,7 +153,7 @@ export class DeployStack extends Stack {
         })
 
         //Create API GW root path with region
-        const regionResource = apiGateway.root.addResource('api')
+        const apiResource = apiGateway.root.addResource('api')
 
         //Create API GW authorizer for header
         const authorizer = new aws_apigateway.RequestAuthorizer(
@@ -190,8 +209,8 @@ export class DeployStack extends Stack {
             }
         )
 
-        const resourceGenAIProxy = regionResource.addResource('gen-ai-proxy')
-        resourceGenAIProxy.addMethod(
+        const resourceImageGenAIProxy = apiResource.addResource('gen-ai-proxy')
+        resourceImageGenAIProxy.addMethod(
             'POST',
             new aws_apigateway.LambdaIntegration(genAIProxyFunction),
             {
@@ -200,8 +219,19 @@ export class DeployStack extends Stack {
             }
         )
 
+        const resourceTextSummarizationGenAIProxy = apiResource.addResource('gen-ai-proxy-text')
+        resourceTextSummarizationGenAIProxy.addMethod(
+            'POST',
+            new aws_apigateway.LambdaIntegration(genAITextProxyFunction),
+            {
+                authorizationType: aws_apigateway.AuthorizationType.CUSTOM,
+                authorizer: authorizer,
+            }
+        )
+
+
         new CfnOutput(this, 'DistributionOutput', {
-            exportName: 'DistributionURL',
+            exportName: 'GenAImiroDistributionURL',
             value: distribution.distributionDomainName,
         })
     }
