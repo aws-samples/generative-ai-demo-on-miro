@@ -1,0 +1,192 @@
+{
+    "amazon.titan-image-generator-v1" : [
+        {
+            "value": "1024 x 1024",
+            "label": "1024 x 1024"
+        },
+        {
+            "value": "512 x 512",
+            "label": "512 x 512"
+        },
+        {
+            "value": "576 x 384",
+            "label": "576 x 384"
+        },
+        {
+            "value": "576 x 448",
+            "label": "576 x 448"
+        },
+        {
+            "value": "640 x 384",
+            "label": "640 x 384"
+        },
+        {
+            "value": "704 x 320",
+            "label": "704 x 320"
+        },
+        {
+            "value": "704 x 384",
+            "label": "704 x 384"
+        },
+        {
+            "value": "768 x 768",
+            "label": "768 x 768"
+        },
+        {
+            "value": "1152 x 768",
+            "label": "1152 x 768"
+        },
+        {
+            "value": "1152 x 896",
+            "label": "1152 x 896"
+        },
+        {
+            "value": "1280 x 768",
+            "label": "1280 x 768"
+        },
+        {
+            "value": "1408 x 640",
+            "label": "1408 x 640"
+        },
+        {
+            "value": "1408 x 768",
+            "label": "1408 x 768"
+        },
+        {
+            "value": "1152 x 640",
+            "label": "1152 x 640"
+        },
+        {
+            "value": "1173 x 640",
+            "label": "1173 x 640"
+        }
+    ],
+    "amazon.titan-image-generator-v2:0" : [
+        {
+            "value": "1024 x 1024",
+            "label": "1024 x 1024"
+        },
+        {
+            "value": "512 x 512",
+            "label": "512 x 512"
+        },
+        {
+            "value": "576 x 384",
+            "label": "576 x 384"
+        },
+        {
+            "value": "576 x 448",
+            "label": "576 x 448"
+        },
+        {
+            "value": "640 x 384",
+            "label": "640 x 384"
+        },
+        {
+            "value": "704 x 320",
+            "label": "704 x 320"
+        },
+        {
+            "value": "704 x 384",
+            "label": "704 x 384"
+        },
+        {
+            "value": "768 x 768",
+            "label": "768 x 768"
+        },
+        {
+            "value": "1152 x 768",
+            "label": "1152 x 768"
+        },
+        {
+            "value": "1152 x 896",
+            "label": "1152 x 896"
+        },
+        {
+            "value": "1280 x 768",
+            "label": "1280 x 768"
+        },
+        {
+            "value": "1408 x 640",
+            "label": "1408 x 640"
+        },
+        {
+            "value": "1408 x 768",
+            "label": "1408 x 768"
+        },
+        {
+            "value": "1152 x 640",
+            "label": "1152 x 640"
+        },
+        {
+            "value": "1173 x 640",
+            "label": "1173 x 640"
+        }
+    ],
+    "stability.stable-diffusion-xl-v1" : [
+        {
+            "value": "1024 x 1024",
+            "label": "1024 x 1024"
+        },
+        {
+            "value": "1088 x 896",
+            "label": "1088 x 896"
+        },
+        {
+            "value": "1216 x 832",
+            "label": "1216 x 832"
+        },
+        {
+            "value": "1344 x 768",
+            "label": "1344 x 768"
+        },
+        {
+            "value": "1536 x 640",
+            "label": "1536 x 640"
+        }
+    ],
+    "stability.sd3-large-v1:0" : [
+        {
+            "value": "1024 x 1024",
+            "label": "1024 x 1024"
+        },
+        {
+            "value": "1088 x 896",
+            "label": "1088 x 896"
+        },
+        {
+            "value": "1216 x 832",
+            "label": "1216 x 832"
+        },
+        {
+            "value": "1344 x 768",
+            "label": "1344 x 768"
+        },
+        {
+            "value": "1536 x 640",
+            "label": "1536 x 640"
+        }
+    ],
+    "stability.stable-image-ultra-v1:0" : [
+        {
+            "value": "1024 x 1024",
+            "label": "1024 x 1024"
+        },
+        {
+            "value": "1088 x 896",
+            "label": "1088 x 896"
+        },
+        {
+            "value": "1216 x 832",
+            "label": "1216 x 832"
+        },
+        {
+            "value": "1344 x 768",
+            "label": "1344 x 768"
+        },
+        {
+            "value": "1536 x 640",
+            "label": "1536 x 640"
+        }
+    ]
+}

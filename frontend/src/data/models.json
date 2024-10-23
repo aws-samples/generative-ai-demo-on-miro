@@ -1,0 +1,7 @@
+[
+    {"value" : "amazon.titan-image-generator-v1", "label" : "amazon.titan-image-generator-v1"},
+    {"value" : "amazon.titan-image-generator-v2:0", "label" : "amazon.titan-image-generator-v2:0"},
+    {"value" : "stability.stable-diffusion-xl-v1", "label" : "stability.stable-diffusion-xl-v1"},
+    {"value" : "stability.sd3-large-v1:0", "label" : "stability.sd3-large-v1:0"},
+    {"value" : "stability.stable-image-ultra-v1:0", "label" : "stability.stable-image-ultra-v1:0"}
+]
