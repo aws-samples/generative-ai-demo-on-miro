@@ -27,7 +27,7 @@ export const getPromptFromStickies = async () => {
         maxX = Math.max(maxX, sticky.x + sticky.width);
         minY = Math.min(minY, sticky.y - sticky.height);
         maxY = Math.max(maxY, sticky.y + sticky.height);
-        console.log(`minX: ${minX}, maxX: ${maxX}, minY: ${minY}, maxY: ${maxY}`);
+        //console.log(`minX: ${minX}, maxX: ${maxX}, minY: ${minY}, maxY: ${maxY}`);
     });
 
     const tolerance = 10;
