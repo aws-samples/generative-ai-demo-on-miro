@@ -1,0 +1,35 @@
+{
+    "amazon.titan-image-generator-v1": [
+      {"value": "us-east-1", "label": "us-east-1"},
+      {"value": "us-west-2", "label": "us-west-2"},
+      {"value": "ap-south-1", "label": "ap-south-1"},
+      {"value": "eu-west-2", "label": "eu-west-2"},
+      {"value": "ap-northeast-2", "label": "ap-northeast-2"}
+    ],
+    "amazon.titan-image-generator-v2:0": [
+      {"value": "us-east-1", "label": "us-east-1"},
+      {"value": "us-west-2", "label": "us-west-2"}
+    ],
+    "amazon.nova-canvas-v1:0": [
+      {"value": "us-east-1", "label": "us-east-1"}
+    ],
+    "stability.stable-diffusion-xl-v1": [
+      {"value": "us-east-1", "label": "us-east-1"},
+      {"value": "us-west-2", "label": "us-west-2"}
+    ],
+    "stability.sd3-large-v1:0": [
+      {"value": "us-west-2", "label": "us-west-2"}
+    ],
+    "stability.sd3-5-large-v1:0": [
+      {"value": "us-west-2", "label": "us-west-2"}
+    ],
+    "stability.stable-image-ultra-v1:0": [
+      {"value": "us-west-2", "label": "us-west-2"}
+    ],
+    "stability.stable-image-core-v1:0": [
+      {"value": "us-west-2", "label": "us-west-2"}
+    ],
+    "SageMaker JumpStart": [
+      {"value":  "N/A", "label": "N/A"}
+    ]
+}

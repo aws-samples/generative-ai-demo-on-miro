@@ -1,23 +1,24 @@
 {
-    "name": "generative-ai-demo-on-miro-frontend",
-    "version": "0.1.0",
-    "license": "MIT",
-    "scripts": {
-        "start": "vite",
-        "build": "vite build",
-        "serve": "vite preview"
-    },
-    "dependencies": {
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0"
-    },
-    "devDependencies": {
-        "@mirohq/websdk-types": "latest",
-        "@types/node": "^18.8.2",
-        "@vitejs/plugin-react": "^2.2.0",
-        "prettier": "2.8.1",
-        "rollup-plugin-sri": "^1.3.4",
-        "typescript": "4.8.4",
-        "vite": "^3.2.7"
-    }
+  "name": "bedrock-ui-react",
+  "version": "0.1.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "mirotone": "5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "vite": "3.0.3",
+    "@mirohq/websdk-types": "latest",
+    "@types/react": "^18.0.24",
+    "@types/react-dom": "^18.0.8",
+    "@vitejs/plugin-react": "^2.2.0",
+    "typescript": "4.9.5",
+    "@types/node": "^18.8.2"
+  }
 }
