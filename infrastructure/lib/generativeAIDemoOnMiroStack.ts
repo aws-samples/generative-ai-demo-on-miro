@@ -88,13 +88,13 @@ export class DeployStack extends Stack {
         )
         secret.grantRead(apiGWAuthFunction)
 
-        const genAIProxyFunction = new aws_lambda_python.PythonFunction(
-            this,
-            'GenAIProxyFunction',
-            {
-                index: 'app.py',
-                entry:  path.join(__dirname, '../../functions/mlInference'),
-                runtime: aws_lambda.Runtime.PYTHON_3_9,
+		const genAIProxyFunction = new aws_lambda_python.PythonFunction(
+			this,
+			'GenAIProxyFunction',
+			{
+				index: 'app.py',
+				entry:  path.join(__dirname, '../../functions/mlInference'),
+				runtime: aws_lambda.Runtime.PYTHON_3_9,
                 environment: {
                     S3_BUCKET: assetsBucket.bucketName,
                     IMAGE_CREATE_ENDPOINT: props.createImageEndpointName,
@@ -102,15 +102,16 @@ export class DeployStack extends Stack {
                     MODIFY_ENDPOINT: props.imageModifyEndpointName,
                     STYLE_TRANSFER_ENDPOINT: props.styleTransferEndpointName,
                 },
-                timeout: Duration.seconds(90),
-            }
-        )
-        genAIProxyFunction.addToRolePolicy(
-            new aws_iam.PolicyStatement({
-                actions: ['sagemaker:InvokeEndpoint', 's3:PutObject'],
-                resources: ['*'],
-            })
-        )
+				timeout: Duration.seconds(30)
+			}
+		)
+
+		genAIProxyFunction.addToRolePolicy(
+			new aws_iam.PolicyStatement({
+				actions: ['bedrock:*', 'sagemaker:InvokeEndpoint'],
+				resources: ['*'],
+			})
+		)
 
         //Log group for API Gateway
         const apiLogGroup = new aws_logs.LogGroup(this, 'GenerativeAIDemoApiGwLogs', {
@@ -201,7 +202,7 @@ export class DeployStack extends Stack {
         )
 
         new CfnOutput(this, 'DistributionOutput', {
-            exportName: 'DistributionURL',
+            exportName: 'MiroGenAIDistributionURL',
             value: distribution.distributionDomainName,
         })
     }
