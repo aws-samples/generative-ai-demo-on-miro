@@ -1,10 +1,2 @@
-boto3==1.26.144
-botocore==1.29.144
-jmespath==1.0.1
-numpy==1.24.3
-Pillow==9.5.0
-python-dateutil==2.8.2
-s3transfer==0.6.1
-six==1.16.0
-urllib3==1.26.16
-requests
+boto3
+Pillow

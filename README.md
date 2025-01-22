@@ -1,42 +1,37 @@
 ## Getting Started
 
- **This demo shows three Generative AI use-cases integrated into single solution on [Miro](https://miro.com/miro-aws/) board.** It turns Python notebooks into dynamic interactive experience, where several team members can brainstorm, explore, exchange ideas empowered by privately hosted Sagemaker generative AI models.
-This demo can be easily extended by adding use-cases to demonstrate new concepts and solutions.
+ **This demo shows usecase of image generation on [Miro](https://miro.com/miro-aws/) board with [Amazon Bedrock](https://aws.amazon.com/bedrock/).** 
 
-<p   align="center">
-<img src="./media/genai-demo-960x540_low_fps.gif">
+
+**Image generation**
+<p align="center">
+<img src="media/genai_demo_generate.gif">
 </p>
 
 
 **Usage instructions:**
 
-| Use case               | How it looks like                                           | Details                                                                                                                                                                                              |
-|------------------------|-------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1. Image generation    | ![Image generation](./media/case-1-image_generation.png)    | **To generate new image:** Select one or several yellow stickers with prompts, then run the app.                                                                                                     |
-| 2. Image inpainting    | ![Image inpainting](./media/case-2-inpainting_result-1.png) | **To transform a part of image:** Define changing part of image using **round** shape, add a sticky note with change prompt, connect image and sticky note, then select all 4 items and run the app. |
-| 3. Image trasformation | ![Image change](./media/case-3-pix2pix_result.png)          | **To transform image:** Select image and sticky note with transformation prompt connected by line, then run the app.                                                                                 |
+| Use case                | Details                                                                                                                                                                                                                                                                                                                                                      |
+|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1. Image generation     | **On the board:** Select one or several stickers with generation prompts (any color except **red**), one or several stickers with negative prompts (**red**) **In the app:** Select scenario: "Generate". Select model, resolution and region, then click "Generate" button                                                                                  |
+| 2. Image transformation | **On the board:** Select one or several stickers with transformation prompts (any color except **red**), one or several stickers with negative prompts (**red**) and a source image **In the app:** Select scenario: "Transform". Select model, resolution and region, then click "Transform" button                                                         |
+| 3. Image inpainting     | **On the board:** Define changing part of image using **round** shape. Select one or several stickers with inpainting prompts (any color except **red**), one or several stickers with negative prompts (**red**), source image and round shape **In the app:** Select scenario: "Inpaint". Select model, resolution and region, then click "Inpaint" button |
 
 Start from brainstorming and then develop your visual idea step-by-step.
 
- 💡 ***Tips: you can use resulted image from previous step as an input for the next.***
+ 💡 ***Tips: you can use resulted image from previous step as an input for the next one.***
 
-![Supercase](./media/supercase-continue-steps_result.png)
+
 
 ### Architecture overview
 
 - **Miro application** is running on the board. Loaded from S3 bucket, accessed via CloudFront distribution. Written on TypeScript.
 - **Authorization and AIML proxy lambdas.** Accessed via APIGateway deployed behind CloudFront. Written on Python.
    - ***Authorization function `authorize`*** provide access to backend functions only for authorized Miro application. It's used to protect organization data and generated content in AWS account.
-   - ***AIML proxy function `mlInference`*** is required to handle API call from application and redirect it to correct Sagemaker inference endpoint. It also can be used for more complex use-cases, when several AIML functions work.
-- **Sagemaker inference endpoints.** Run inference.
+   - ***AIML proxy function `mlInference`*** is required to handle API call from application and redirect it to Amazon Bedrock model.
  
 ![Architecture](./media/app_architecture_overview.png)
 
-The demo could be extended in two ways: 
-1. by adding new AIML use cases. 
-2. by changing/empowering interface on Miro board or Web-interface.
-
-In both cases existing environment can be used as boilerplate. [More details here](#demo-extension-with-additional-use-cases) 
 
 ### Deployment
 
@@ -88,7 +83,7 @@ Fill in the necessary information about your app, such as its name, select Devel
    ```
    IAMFullAccess, AmazonS3FullAccess, AmazonSSMFullAccess, CloudWatchLogsFullAccess,
    CloudFrontFullAccess, AmazonAPIGatewayAdministrator, AWSCloudFormationFullAccess, 
-   AWSLambda_FullAccess, AmazonSageMakerFullAccess
+   AWSLambda_FullAccess, AmazonBedrockFullAccess, AmazonSageMakerFullAccess
    ```
 
    </details>
@@ -136,10 +131,22 @@ Please enter the CloudFront URL that you obtained on the previous step.
 
 
 
-### Sagemaker endpoints
+### Bedrock models
 
-**You need to run dedicated Sagemaker endpoint for each use case.**
-Each use-case is supported by a separate Jupyter notebook in **`./ml_services/<use_case>`** subdirectory:
+**You need to request access to the Bedrock models you are planning to use in sufficient regions.**
+
+Please follow [AWS documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/getting-started.html) to request access.
+Models used in this sample defined in **`./frontend/src/data/scenarios.json`** file, available regions and resolutions per model defined in **`./frontend/src/data/regions.json`** and **`./frontend/src/data/resolutions.json`**.
+Based on your selection of models and regions you can update this files to keep frontend options consistent.
+
+
+
+### Sagemaker endpoints (optional)
+
+Previous version of the sample (basic frontend and Sagemaker enpoints only support) could be found in the dedicated [repo branch](https://github.com/aws-samples/generative-ai-demo-on-miro/tree/sagemaker-endpoints-only)
+
+**You may run dedicated Sagemaker endpoints if you'd like to run your own use-cases.**
+Each of sample use-cases is supported by a separate Jupyter notebook in **`./ml_services/<use_case>`** subdirectory:
 - `1-create_image` image generation (Stable diffusion 2.1), based on [this example](https://github.com/aws/studio-lab-examples/blob/main/generative-deep-learning/stable-diffusion-finetune/JumpStart_Stable_Diffusion_Inference_Only.ipynb)
 - `2-inpaint_image` image inpainting (Stable diffusion 2 Inpainting fp16), based on [this example](https://github.com/aws/amazon-sagemaker-examples/blob/main/introduction_to_amazon_algorithms/jumpstart_inpainting/Amazon_JumpStart_Inpainting.ipynb)
 - `3-modify_image` image pix2pix modification (Huggingface instruct pix2pix), based on [this example](https://github.com/aws/amazon-sagemaker-examples/tree/main/advanced_functionality/huggingface_deploy_instructpix2pix)
@@ -152,9 +159,11 @@ Each use-case is supported by a separate Jupyter notebook in **`./ml_services/<u
 - Go to **./ml_services/<use_case>** directory and run one-by-one all three Sagemaker notebooks.
 - After endpoint started and successfully tested in notebook, go to **Miro board**, select required items and run use-case.
 
+
 ### Demo extension with additional use-cases
 
-🛸 ***Extension guidance --TBD--***  ⏳
+The demo could be extended in various ways, e.g. by adding new use-cases, changing interface or improving existing functionality.
+Existing environment can be used as boilerplate.
 
 ### License
 
