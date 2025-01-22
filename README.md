@@ -143,6 +143,8 @@ Based on your selection of models and regions you can update this files to keep 
 
 ### Sagemaker endpoints (optional)
 
+Previous version of the sample (basic frontend and Sagemaker enpoints only support) could be found in the dedicated [repo branch](https://github.com/aws-samples/generative-ai-demo-on-miro/tree/sagemaker-endpoints-only)
+
 **You may run dedicated Sagemaker endpoints if you'd like to run your own use-cases.**
 Each of sample use-cases is supported by a separate Jupyter notebook in **`./ml_services/<use_case>`** subdirectory:
 - `1-create_image` image generation (Stable diffusion 2.1), based on [this example](https://github.com/aws/studio-lab-examples/blob/main/generative-deep-learning/stable-diffusion-finetune/JumpStart_Stable_Diffusion_Inference_Only.ipynb)
