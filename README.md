@@ -3,7 +3,7 @@
  **This demo shows usecase of image generation on [Miro](https://miro.com/miro-aws/) board with [Amazon Bedrock](https://aws.amazon.com/bedrock/).** 
 
 
-**Image generation**
+**Image generation - [blog post with use-case description and solution details](https://aws.amazon.com/blogs/gametech/level-up-mood-board-creation-with-miro-and-amazon-bedrock-part-2/)**
 <p align="center">
 <img src="media/genai_demo_generate.gif">
 </p>
